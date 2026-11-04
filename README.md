@@ -4,7 +4,7 @@ Paint text and pictures directly onto vessels already in service in Kerbal Space
 
 An EVA Kerbal carries a spray can in KIS inventory, equips it, and right-clicks a vessel surface to create a marking. A surface preview lets the player enter text or select an image, rotate it, and adjust its size before applying it. No visible plate or separate decal part needs to be attached.
 
-**Status: design and documentation only.** There is no plugin, installable package, or tested gameplay implementation yet. Everything described below is intended behaviour, not a claim of working features.
+**Status: 0.1.0 prototype implemented and built; installation and in-game validation pending.** Offline tests cover record persistence, editing transactions, and installed API/configuration compatibility. They do not prove rendering, EVA controls, or gameplay persistence.
 
 ## Why this exists
 
@@ -36,10 +36,10 @@ Applied markings are intended to stay with the painted part through save/reload,
 
 Initial target: **KSP 1.12.5 on Windows with Kerbal Inventory System (KIS)**. This is a target, not verified compatibility. The initial use case is an EVA engineer labelling existing vessels and modules.
 
-The rendering approach and final dependencies have not been selected. Conformal Decals is a research reference, not currently a dependency. Stock EVA inventory support is not part of the initial KIS workflow.
+The prototype uses its own surface-conforming meshes and part-module storage. It requires KIS (built against 1.29.8039.40483), KIS's bundled KSPDev utilities, and ModuleManager. Conformal Decals is not a dependency. Stock EVA inventory support is not implemented.
 
 ## Installation and development
 
-There is nothing to install or build yet. No live game files or saves have been changed for this project.
+See [building and using the prototype](docs/PROTOTYPE.md) for build/package commands, controls, limits, and future installation instructions. No live game files or saves were changed while preparing the candidate.
 
-The first prototype will investigate a marking on an already-launched curved tank, including surface alignment and save/reload persistence. See the [roadmap](docs/ROADMAP.md).
+The first in-game check must investigate a marking on an already-launched curved tank, including surface alignment and save/reload persistence. See the [roadmap](docs/ROADMAP.md).

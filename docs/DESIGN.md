@@ -1,6 +1,16 @@
 # Technical design
 
-Status: research and proposed architecture, 4 November 2026. No implementation exists. Names below describe responsibilities, not existing classes or APIs.
+Status: prototype architecture, updated 4 November 2026. Core implementation now exists; native game validation remains pending. The design questions below are retained where they still require evidence.
+
+## 0.1.0 implementation
+
+- `PaintTool` queries the active EVA Kerbal's actual KIS inventories and equipped `gaSprayCan` item. It distinguishes a short right-click from camera dragging, provides the flight editor, owns the EVA/control lock during editing, and rechecks a 3 m reach and line of sight before changes.
+- `PaintVisual` tessellates text glyphs or image rectangles into meshes sampled against only the selected part's colliders. Front-facing hits receive a 2.5 mm surface offset; missing samples are clipped. Rendering uses Unity's built-in `Sprites/Default` shader. No physical marking part is created.
+- `ModuleGraffitiSurface` is added through ModuleManager to eligible part prefabs. It serializes committed markings inside that part's module, preserving unknown records for recovery. Existing launched vessels should receive the added prefab module through KSP's loader; this remains a required game test.
+- `MarkingData` supplies a versioned invariant-culture codec with base64 UTF-8 text and validated relative PNG names. `MarkingCollection` copies drafts on commit and returns copied snapshots, separating previews from saved data.
+- The held can uses original generated geometry and colour textures. No upstream mod asset or renderer source is bundled.
+
+The following sections distinguish source research from implementation choices and native validation still needed.
 
 ## Proposed components
 
@@ -47,9 +57,9 @@ Text records need content, font identity, and colour. Image records need a porta
 
 Do not persist transient previews, UI focus, input locks, or temporary render objects. Image paths must resolve inside the designated image folder; arbitrary paths and executable content are not image inputs.
 
-### Persistence choice remains open
+### Persistence choice and validation
 
-Evaluate part-module storage against a scenario-level store indexed by stable part identity. Neither is selected yet. The proof must cover parts in vessels launched before the addon existed, loaded/unloaded transitions, repeated reload without duplication, docking/undocking, and removal of the target part. A vessel identifier alone is insufficient because docking changes vessel membership.
+Part-module storage was selected to avoid vessel-identifier remapping during docking. There is no scenario-wide vessel lookup. Offline host tests cover repeated record loading and transaction semantics. Actual KSP tests must still cover vessels launched before the addon existed, loaded/unloaded transitions, docking/undocking, and removal/movement of the target part.
 
 Document removal behaviour before release: what happens to stored markings if the addon is absent, and whether reinstalling can recover them. Do not promise either outcome before testing it. Installation must not require an external save-file rewrite.
 
@@ -64,14 +74,14 @@ Document removal behaviour before release: what happens to stored markings if th
 
 Preview and committed rendering must use consistent geometry so Apply does not move or resize the marking unexpectedly. All exit paths must release input ownership and dispose of temporary rendering resources.
 
-## Open implementation decisions
+## Decisions and remaining investigation
 
-- Rendering strategy, dependency versions, and supported graphics/shader combinations.
-- Storage mechanism and stable part identity for existing launched vessels.
-- Eligibility rules, working distance, and equipped-model integration.
-- Access to normal part menus while painting and overlapping-mark selection.
-- Font packaging, text layout, image formats/limits, and image refresh behaviour.
-- Limits on markings, texture memory, and cleanup when parts/vessels unload.
+- Surface-conforming mesh rendering is selected; actual graphics/shader compatibility and collider-to-visible-hull alignment need game validation.
+- Part-module storage is selected; existing-vessel loading and KIS construction/storage transfers need game validation.
+- The initial tool is usable by any EVA Kerbal who can equip it, with 3 m reach; engineer-only restrictions are not imposed in this prototype.
+- Alt + right-click keeps normal part-menu access. The editor lists markings on the target part for deterministic overlap selection.
+- The initial font is built-in Arial. PNG selection supports refresh without restarting. See [prototype limits](PROTOTYPE.md) for bounds and memory budget.
+- Renderer/texture disposal is implemented; actual repeated-use memory behaviour needs game validation.
 - Behaviour on animated, deployable, rescaled, or variant-switched parts; these require explicit validation rather than assumed support.
 
 These are bounded prototype questions, not additional promised features.

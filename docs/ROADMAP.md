@@ -1,6 +1,6 @@
 # Development roadmap
 
-Status: documentation only. Every implementation stage below is pending. These are project milestones, not scheduled tasks or delivery dates.
+Status: 0.1.0 implementation built, updated 4 November 2026. Code for the five stages now exists, including a prototype can asset; all in-game exit evidence below remains pending. Offline evidence is recorded in [validation](VALIDATION.md). These are project milestones, not scheduled tasks or delivery dates.
 
 ## 1. Prove surface marking and persistence
 

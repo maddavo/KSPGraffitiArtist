@@ -1,6 +1,15 @@
 # Validation plan
 
-Status: planned only. None of these scenarios has been executed for Graffiti Artist. Documentation checks are not plugin tests.
+Status: offline validation completed for the 0.1.0 candidate, 4 November 2026. All in-game scenarios below remain pending installation and testing.
+
+## Completed offline evidence
+
+- Compiles against the installed KSP 1.12.5 and KIS 1.29.8039.40483 assemblies with compiler warnings treated as errors.
+- 289 assertions execute the production record codec, marking collection, and surface module source. They cover Unicode/newlines, invariant-culture/randomized round-trips, bad-data bounds, missing-image references, draft isolation, failed applies, capacity, erase, repeated load, and retention of unknown records. The module is hosted with explicit ConfigNode/Unity stand-ins; this does not test the stock loader.
+- 13 checks inspect the actual installed assemblies and candidate DLL, and parse the can configuration using KSP's real ConfigNode parser. No Unity scene or KIS interaction is executed.
+- Original can model independently parsed with the `io_object_mu` reader: six meshes, 804 vertices, four materials, four textures; 768 outward-facing triangles checked. The final model also contains a box collider. This is format/geometry evidence, not proof of loading or held orientation in KSP.
+
+`build.ps1`, `test.ps1`, and `package.ps1` reproduce the build, persistence/API checks, and candidate package. Package receipts retain artifact/dependency hashes and the source revision.
 
 Record the tested plugin revision, KSP/KIS versions, graphics configuration, result, and relevant logs or screenshots. Use a disposable career/sandbox and existing launched test vessels; do not modify a live career to manufacture a passing result.
 

@@ -1,6 +1,6 @@
 # Interaction and requirements
 
-Status: initial design, 4 November 2026. Requirements describe intended behaviour and remain unimplemented.
+Status: acceptance requirements, updated 4 November 2026. A 0.1.0 prototype implements the core workflow; actual game behaviour remains unverified. See [prototype limits](PROTOTYPE.md).
 
 ## Agreed product direction
 
@@ -63,4 +63,4 @@ Image selection is from an addon's designated local image folder. The final loca
 
 Initial work covers text/image markings, the KIS spray-can workflow, surface preview, editing/erasing, and persistence on vessel parts. Freehand brush strokes, terrain painting, paint-consumption resources, and stock-inventory integration are not agreed features.
 
-This documentation task does not authorize implementation or installation. Development will need to validate the design before claiming compatibility or gameplay success.
+Implementation and building were subsequently authorized. Installation is awaiting Dave's confirmation that KSP is closed. Development must validate the design before claiming gameplay success.
