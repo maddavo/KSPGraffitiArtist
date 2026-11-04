@@ -31,6 +31,12 @@ namespace KSPGraffitiArtist
         // Offset from the visible triangle, not the collision hull. Small cells bound chord sag.
         public const float Lift=.0025f;
         public const float SampleSpacing=.02f;
+        public static SurfaceVector RightTangent(SurfaceVector outward,SurfaceVector up)
+        {
+            // From outside the hull the viewing direction is -outward.
+            // Camera-right = up x viewing-direction = outward x up.
+            return SurfaceVector.Cross(outward,up).Unit;
+        }
         sealed class Node
         {
             public SurfaceVector Min,Max;

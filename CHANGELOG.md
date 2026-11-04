@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 — orientation and colour correction, 4 November 2026
+
+- Fix horizontally mirrored text and pictures by deriving the right tangent from outward-normal cross up. Preserve saved position, rotation, scale and content.
+- Extract font alpha into a cached white-RGB coverage atlas, so chosen text colour is not multiplied by font-atlas RGB. Explicitly set mesh vertex colours to white. Keep pictures' original RGB and depth-tested surface rendering.
+- Reverse triangle winding for the corrected basis, retaining outward mesh normals. No save schema changes or save edits.
+- Add front/back and rotated-frame orientation regressions plus coverage/colour tests. Native corrected lettering and colour still require game validation.
+
 ## 0.1.1 — clipping correction candidate, 4 November 2026
 
 - Project text and pictures onto the selected part's actual visible mesh instead of its collision hull. Quicksave #336's Eagle A/Mk3 label reproduced an average 20 mm hull/collider mismatch against the old 2.5 mm lift.

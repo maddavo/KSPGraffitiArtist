@@ -80,9 +80,9 @@ namespace KSPGraffitiArtist
             Vector3 centre=part.transform.TransformPoint(new Vector3(m.X,m.Y,m.Z));
             Vector3 normal=part.transform.TransformDirection(new Vector3(m.NX,m.NY,m.NZ)).normalized;
             Vector3 up=part.transform.TransformDirection(new Vector3(m.UX,m.UY,m.UZ)).normalized;
-            // Positive rotation is clockwise when looking at the painted face.
+            // Retain stored rotation angles; derive horizontal orientation as viewed from outside.
             up=Quaternion.AngleAxis(-m.Rotation,normal)*up;
-            Vector3 right=Vector3.Cross(up,normal).normalized;
+            Vector3 right=VisibleSurface.RightTangent(normal,up);
             float depth=Mathf.Clamp(m.Width*.5f,.15f,1.25f);
             var vertices=new List<Vector3>(); var uv=new List<Vector2>(); var triangles=new List<int>();
             if(m.Kind=="image") {
@@ -122,12 +122,16 @@ namespace KSPGraffitiArtist
                             (q[1].position.x-cx)*scale,(q[1].position.y-cy)*scale,
                             q[3].uv0,q[2].uv0,q[1].uv0,q[0].uv0,vertices,uv,triangles);
                     }
-                    material.mainTexture=PaintFont.material.mainTexture;
+                    material.mainTexture=FontCoverageAtlas.Get(PaintFont);
                     material.color=new Color(m.R,m.G,m.B,1);
                 } finally { ((IDisposable)generator).Dispose(); }
             }
             if(vertices.Count>65535)mesh.indexFormat=UnityEngine.Rendering.IndexFormat.UInt32;
             mesh.SetVertices(vertices); mesh.SetUVs(0,uv); mesh.SetTriangles(triangles,0);
+            // Sprite tint multiplies vertex colour as well as texture; specify neutral white explicitly.
+            var colors=new Color32[vertices.Count];
+            for(int i=0;i<colors.Length;i++)colors[i]=new Color32(255,255,255,255);
+            mesh.colors32=colors;
             mesh.RecalculateNormals(); mesh.RecalculateBounds();
         }
         static void AddQuad(Part part,VisibleSurface surface,Vector3 centre,Vector3 normal,Vector3 right,Vector3 up,float depth,
@@ -157,7 +161,7 @@ namespace KSPGraffitiArtist
                 uv.Add(Vector2.Lerp(Vector2.Lerp(uv00,uv10,s1),Vector2.Lerp(uv01,uv11,s1),t0));
                 uv.Add(Vector2.Lerp(Vector2.Lerp(uv00,uv10,s1),Vector2.Lerp(uv01,uv11,s1),t1));
                 uv.Add(Vector2.Lerp(Vector2.Lerp(uv00,uv10,s0),Vector2.Lerp(uv01,uv11,s0),t1));
-                triangles.AddRange(new int[]{first,first+1,first+2,first,first+2,first+3});
+                triangles.AddRange(new int[]{first,first+2,first+1,first,first+3,first+2});
             }
         }
         public void Dispose() { UnityEngine.Object.Destroy(root); UnityEngine.Object.Destroy(mesh); UnityEngine.Object.Destroy(material); }

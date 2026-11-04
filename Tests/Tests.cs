@@ -13,6 +13,14 @@ class Tests
     static int Main()
     {
         try {
+            Check(FontCoverage.WhiteWithCoverage(0xFF000000u)==0xFFFFFFFFu,"opaque black font RGB becomes neutral white coverage");
+            Check(FontCoverage.WhiteWithCoverage(0x80000000u)==0x80FFFFFFu,"font antialias alpha preserved");
+            Check(FontCoverage.WhiteWithCoverage(0x00123456u)==0x00FFFFFFu,"transparent font background stays transparent");
+            for(uint alpha=0;alpha<256;alpha++){
+                uint whitened=FontCoverage.WhiteWithCoverage((alpha<<24)|0x007A1234u);
+                Check(whitened==((alpha<<24)|0x00FFFFFFu),"font RGB independence and alpha "+alpha);
+            }
+            Check((FontCoverage.WhiteWithCoverage(0xFF000000u)&0xFF)==255,"red tint is not multiplied by black atlas RGB");
             var original=new MarkingData{Text="HAB 03\n燃料 🚀 = {part}\r\n",Rotation=359.9f,Width=.1f};
             MarkingData decoded;
             Check(MarkingData.TryDecode(original.Encode(),out decoded),"decode valid text");
@@ -77,7 +85,7 @@ class Tests
             Check(previewSave.GetNodes("MARKING").Length==3,"preview suppression never deletes saved records");
             restored.Erase(original.Id);output=new ConfigNode();restored.OnSave(output);
             Check(restored.Records.Count==0&&output.GetNodes("MARKING").Length==2,"erase retains unrecognized records");
-            Console.WriteLine("PASS: "+count+" assertions using production record/store/module source.");
+            Console.WriteLine("PASS: "+count+" assertions using production record/store/module/coverage source.");
             GeometryTests.Run();
             Console.WriteLine("Host substitutes ConfigNode and engine lifecycle only; no in-game result is implied.");return 0;
         }catch(Exception ex){Console.Error.WriteLine(ex);return 1;}

@@ -10,6 +10,11 @@ namespace KSPGraffitiArtist
         readonly Part part;
         readonly SurfaceGeometry geometry;
         static SurfaceVector V(Vector3 v){return new SurfaceVector(v.x,v.y,v.z);}
+        public static Vector3 RightTangent(Vector3 outward,Vector3 up)
+        {
+            SurfaceVector right=SurfaceGeometry.RightTangent(V(outward),V(up));
+            return new Vector3(right.X,right.Y,right.Z);
+        }
         public VisibleSurface(Part part)
         {
             this.part=part;

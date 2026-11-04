@@ -15,6 +15,29 @@ public static class GeometryTests
     }
     public static int Run()
     {
+        // A viewer on the -Z side looks along +Z: their screen-right is +X.
+        SurfaceVector front=SurfaceGeometry.RightTangent(V(0,0,-1),V(0,1,0));
+        Check(front.X>.999f,"front-face text/image must advance toward screen-right");
+        Check(SurfaceVector.Cross(V(0,1,0),V(0,0,-1)).X<0,"old basis reproduced mirrored lettering");
+        SurfaceVector back=SurfaceGeometry.RightTangent(V(0,0,1),V(0,1,0));
+        Check(back.X<-.999f,"opposite face remains readable from its own outside");
+        foreach(SurfaceVector normal in new[]{V(0,0,-1),V(0,0,1),V(-1,0,0),V(1,0,0),V(0,-1,0),V(0,1,0)}){
+            SurfaceVector initial=Math.Abs(normal.Y)>.5f?V(0,0,1):V(0,1,0);
+            foreach(float angle in new[]{0f,30f,90f,98.79898f,180f,270f}){
+                double radians=-angle*Math.PI/180;
+                SurfaceVector up=initial*(float)Math.Cos(radians)+SurfaceVector.Cross(normal,initial)*(float)Math.Sin(radians);
+                SurfaceVector right=SurfaceGeometry.RightTangent(normal,up);
+                Check(Math.Abs(right.LengthSquared-1)<1e-5f,"unit horizontal axis "+angle);
+                Check(Math.Abs(SurfaceVector.Dot(right,up))<1e-5f,"orthogonal horizontal axis "+angle);
+                Check(SurfaceVector.Dot(SurfaceVector.Cross(up,normal*-1),right)>.999f,"viewer-right handedness "+angle);
+            }
+        }
+        // An asymmetric picture/text footprint must keep increasing U/X to the viewer's right.
+        float last=float.MinValue;
+        foreach(float x in new[]{-.8f,-.4f,.2f,.9f}){
+            float screenX=SurfaceVector.Dot(front*x,V(1,0,0));
+            Check(screenX>last,"asymmetric glyph/picture point order");last=screenX;
+        }
         var triangles=new List<SurfaceTriangle>();Plane(triangles,.05f,true);
         var visible=new SurfaceGeometry(triangles);SurfaceVector hit;
         Check(visible.Project(V(0,0,0),V(0,0,1),.5f,out hit),"hit visible hull beyond original collider");

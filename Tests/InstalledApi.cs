@@ -22,7 +22,7 @@ class InstalledApi
             Type module=plugin.GetType("KSPGraffitiArtist.ModuleGraffitiSurface");
             Check(module!=null && module.BaseType==gameAssembly.GetType("PartModule"),"part-module base");
             Check(plugin.GetType("KSPGraffitiArtist.PaintTool").GetCustomAttributes(false).Any(a=>a.GetType().Name=="KSPAddon"),"flight addon attribute");
-            Check(plugin.GetName().Version.ToString()=="0.1.1.0","assembly version");
+            Check(plugin.GetName().Version.ToString()=="0.1.2.0","assembly version");
             Type inventory=kis.GetType("KIS.ModuleKISInventory"),item=kis.GetType("KIS.KIS_Item");
             Check(inventory.GetField("items")!=null,"KIS inventory items");
             Check(item.GetProperty("equipped")!=null,"KIS equipped property");

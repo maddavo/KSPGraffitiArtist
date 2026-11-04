@@ -1,13 +1,13 @@
 # Validation plan
 
-Status: offline validation completed for the 0.1.1 candidate, 4 November 2026. Dave used 0.1.0 and saved an Eagle A label in #336; its poor visibility is reproduced offline. Corrected in-game appearance and the remaining acceptance scenarios are pending.
+Status: offline validation completed for the 0.1.2 candidate, 4 November 2026. Dave's screenshot shows visible hull paint in 0.1.1, but reversed lettering and missing red tint. Corrected 0.1.2 rendering and colour remain pending native validation.
 
 ## Completed offline evidence
 
 - Compiles against the installed KSP 1.12.5 and KIS 1.29.8039.40483 assemblies with compiler warnings treated as errors.
-- 289 assertions execute the production record codec, marking collection, and surface module source. They cover Unicode/newlines, invariant-culture/randomized round-trips, bad-data bounds, missing-image references, draft isolation, failed applies, capacity, erase, repeated load, and retention of unknown records. The module is hosted with explicit ConfigNode/Unity stand-ins; this does not test the stock loader.
+- 549 assertions execute the production record codec, marking collection, surface module and font-coverage conversion. They cover Unicode/newlines, invariant-culture/randomized round-trips, bad-data bounds, missing-image references, draft isolation, failed applies, capacity, erase, repeated load, unknown records, and coverage alpha preservation independent of atlas RGB. The module is hosted with explicit ConfigNode/Unity stand-ins; this does not test the stock loader or GPU copy.
 - 13 checks inspect the actual installed assemblies and candidate DLL, and parse the can configuration using KSP's real ConfigNode parser. No Unity scene or KIS interaction is executed.
-- 270 baseline assertions execute the production triangle-projection kernel, including collider-versus-visible-hull separation, nearest/front-facing hits, holes, bounds, hierarchy traversal, and convex curved hull clearance. A locally generated read-only Mk3/#336 fixture adds 126 assertions at 63 label-area positions (396 total projection assertions on Dave's machine). Stock geometry is not bundled in the repository or package. See [diagnosis](CLIPPING-336.md) for dimensions and hashes.
+- 385 baseline assertions execute the production projection/orientation kernel, including exterior front/back and rotated frame handedness, asymmetric content order, hull separation, nearest/front-facing hits, holes, bounds, hierarchy traversal, and convex curved hull clearance. A locally generated read-only Mk3/#336 fixture adds 126 assertions at 63 label-area positions (511 total projection/orientation assertions on Dave's machine). Stock geometry is not bundled in the repository or package. See [diagnosis](CLIPPING-336.md) for dimensions and hashes.
 - Original can model independently parsed with the `io_object_mu` reader: six meshes, 804 vertices, four materials, four textures; 768 outward-facing triangles checked. The final model also contains a box collider. This is format/geometry evidence, not proof of loading or held orientation in KSP.
 
 `build.ps1`, `test.ps1`, and `package.ps1` reproduce the build, persistence/API checks, and candidate package. Package receipts retain artifact/dependency hashes and the source revision.

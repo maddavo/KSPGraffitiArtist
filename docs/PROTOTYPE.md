@@ -1,6 +1,6 @@
-# Building and using prototype 0.1.1
+# Building and using prototype 0.1.2
 
-The 0.1.1 correction is built but has not been installed or run in KSP. 0.1.0 loaded and saved a label in game but rendered most of it below the Mk3 Passenger Module's hull. The [read-only #336 diagnosis](CLIPPING-336.md) explains the change. Existing schema-1 labels are retained and rendered through the corrected path; no save migration is required. Appearance after the update still needs a game check.
+0.1.1 made Eagle A's label visible, confirming progress on the hull-clipping correction, but the user screenshot showed mirrored lettering and black text where red was intended. 0.1.2 corrects the horizontal frame and font-colour path; see [the diagnosis](ORIENTATION-COLOUR.md). Existing schema-1 labels are retained and regenerated on load; no save migration or repaint is required by the data format. Native corrected appearance and colour still need a game check.
 
 ## Build and package
 

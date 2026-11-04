@@ -109,7 +109,7 @@ namespace KSPGraffitiArtist
             float height=m.Width;
             if(m.Kind=="image") {Texture2D t=PaintImages.Load(m.Image);if(t!=null)height=m.Width*t.height/t.width;}
             return Mathf.Abs(Vector3.Dot(delta,normal))<Mathf.Max(.15f,m.Width*.5f)
-                && Mathf.Abs(Vector3.Dot(delta,Vector3.Cross(up,normal)))<m.Width*.55f
+                && Mathf.Abs(Vector3.Dot(delta,VisibleSurface.RightTangent(normal,up)))<m.Width*.55f
                 && Mathf.Abs(Vector3.Dot(delta,up))<height*.55f;
         }
         bool CanReach()
@@ -226,6 +226,6 @@ namespace KSPGraffitiArtist
             if(preview!=null){preview.Dispose();preview=null;}
             draft=null;target=null;surface=null;actor=null;textFocused=false;editing=false;pendingClick=false;
         }
-        void OnDestroy(){Close();Font.textureRebuilt-=FontChanged;PaintImages.Clear();eligibleLast=false;}
+        void OnDestroy(){Close();Font.textureRebuilt-=FontChanged;PaintImages.Clear();FontCoverageAtlas.Clear();eligibleLast=false;}
     }
 }
