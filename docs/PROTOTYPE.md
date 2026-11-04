@@ -1,4 +1,6 @@
-# Building and using prototype 0.1.2
+# Building and using prototype 0.1.3
+
+0.1.3 reverses Q/E relative to 0.1.2 and moves size controls to A/D: A smaller, D larger. Native control validation is pending. No stored rotation values are rewritten.
 
 0.1.1 made Eagle A's label visible, confirming progress on the hull-clipping correction, but the user screenshot showed mirrored lettering and black text where red was intended. 0.1.2 corrects the horizontal frame and font-colour path; see [the diagnosis](ORIENTATION-COLOUR.md). Existing schema-1 labels are retained and regenerated on load; no save migration or repaint is required by the data format. Native corrected appearance and colour still need a game check.
 
@@ -35,7 +37,7 @@ No upstream KIS/stock files need replacement and no external save edit is requir
 1. In the editor's Utility category or KIS inventory part picker, find **GA-1 Graffiti Artist Spray Can**. It costs 25 funds, has 0.8 L KIS volume and 0.5 kg mass, and unlocks at Engineering 101.
 2. Deliver a can in KIS storage to the existing vessel. Transfer it to the EVA Kerbal's KIS inventory and equip it in the right hand. The prototype permits any EVA Kerbal who can equip a KIS item.
 3. Right-click a nearby hull without dragging the camera. Reach is measured within 3 m of the Kerbal's part origin, with a clear line of sight. Hold **Alt** when right-clicking to retain normal part menus.
-4. Enter text or choose a PNG picture. Use **Q/E** to rotate and **W/S** to decrease/increase width. These keys type normally when the text field has focus; click another editor control to return to transform controls.
+4. Enter text or choose a PNG picture. Use **Q/E** to rotate and **A/D** to decrease/increase width. These keys type normally when the text field has focus; click another editor control to return to transform controls.
 5. Click **Apply**, or **Cancel/Escape**. The old applied marking remains saved until a valid Apply/Erase succeeds, even though it is temporarily hidden while previewing an edit.
 6. To edit/erase, right-click an existing marking. The editor also lists all markings on the target part, allowing overlapping marks to be selected. **New marking at clicked point** starts another draft at the original click position. Switching selections discards the current uncommitted draft.
 

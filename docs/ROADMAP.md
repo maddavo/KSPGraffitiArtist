@@ -16,7 +16,7 @@ Exit evidence: stored/unequipped cans cannot paint; equipped cans can target a n
 
 ## 3. Implement the text editor
 
-Provide text, colour/font selection, live preview, Q/E rotation, W/S size, and Apply/Cancel. Add existing-mark editing and erasing. Resolve overlapping-mark selection.
+Provide text, colour/font selection, live preview, Q/E rotation, A/D size, and Apply/Cancel. Add existing-mark editing and erasing. Resolve overlapping-mark selection.
 
 Exit evidence: typing does not transform paint or move the Kerbal; cancellation preserves the old marking; every exit restores normal controls.
 

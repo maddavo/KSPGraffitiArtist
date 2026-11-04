@@ -4,7 +4,7 @@ Paint text and pictures directly onto vessels already in service in Kerbal Space
 
 An EVA Kerbal carries a spray can in KIS inventory, equips it, and right-clicks a vessel surface to create a marking. A surface preview lets the player enter text or select an image, rotate it, and adjust its size before applying it. No visible plate or separate decal part needs to be attached.
 
-**Status: 0.1.2 orientation/colour correction prepared; native visual validation pending.** 0.1.1 made the label visible on the hull, but Dave's screenshot exposed mirrored lettering and missing red tint. 0.1.2 corrects the outward-facing horizontal axis and separates font alpha coverage from the chosen ink colour. See [orientation and colour](docs/ORIENTATION-COLOUR.md) and the earlier [clipping diagnosis](docs/CLIPPING-336.md). Offline checks do not establish corrected in-game appearance.
+**Status: 0.1.3 control update prepared; native validation pending.** Q/E rotation is reversed from 0.1.2 and size now uses A/D (smaller/larger). The existing orientation, colour and visible-hull rendering paths are retained; see [orientation and colour](docs/ORIENTATION-COLOUR.md).
 
 ## Why this exists
 
@@ -17,7 +17,7 @@ The player should be able to decide what a label says at the destination. Prepar
 1. Carry a spray can in KIS inventory and equip it on EVA.
 2. Right-click a vessel or module surface within reach to open the editor at that position.
 3. Enter text or select an image and inspect its preview on the surface.
-4. Use **Q/E** to rotate and **W/S** to decrease/increase size.
+4. Use **Q/E** to rotate and **A/D** to decrease/increase size.
 5. Choose **Apply** to retain the marking or **Cancel** to discard the preview.
 6. With the tool equipped, right-click an existing marking to edit or erase it.
 

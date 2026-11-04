@@ -9,7 +9,7 @@ The tool puts text or pictures directly onto the surface of existing vessels and
 - The player carries a spray-paint can in KIS inventory and equips it as the active tool.
 - Right-clicking a paintable surface opens an editor anchored to the clicked position.
 - The editor accepts text or an image selection and shows a live surface preview.
-- Q/E controls rotation; W/S controls size.
+- Q/E controls rotation; A/D controls size.
 - Apply commits the preview; Cancel abandons it without changing existing paint.
 - Equipped-tool interaction with an existing marking supports editing and erasing.
 - Markings persist independently of the can, attached to their target part.
@@ -38,7 +38,7 @@ An ordinary right-click on a valid target with the tool equipped should open the
 | Text mode | Enter a label; select text colour and font |
 | Image mode | Choose a picture from a thumbnail gallery |
 | Q / E outside text entry | Rotate counterclockwise / clockwise as viewed from outside the surface |
-| W / S outside text entry | Decrease / increase size |
+| A / D outside text entry | Decrease / increase size |
 | Apply | Commit the displayed marking |
 | Cancel or Escape | Discard uncommitted changes and close |
 | Erase while editing an existing marking | Explicitly remove that marking |

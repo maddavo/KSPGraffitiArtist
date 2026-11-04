@@ -34,7 +34,7 @@ These checks cannot prove shader appearance, equipped-tool behaviour, native inp
 | Occlusion/reach | A blocked, distant, or invalid target cannot receive paint |
 | Projection | Paint stays on the selected part, without bleeding onto a neighbouring part or through the far wall |
 | Camera and UI | Right-drag still moves the camera; clicking editor/UI controls does not paint the hull behind them |
-| Keyboard focus | Q/E rotate and W/S resize outside text input; inside text input they type letters; the Kerbal does not move while editing |
+| Keyboard focus | Q/E rotate and A/D resize outside text input; inside text input they type letters; the Kerbal does not move while editing |
 | New marking | Apply retains exactly the preview; Cancel/Escape creates no record |
 | Existing marking | Editing then Cancel retains the old marking; Apply replaces it; Erase removes only the selected marking |
 | Overlap | Closely overlapping markings can be selected individually using the documented selection UI |

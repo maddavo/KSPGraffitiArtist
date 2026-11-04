@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 — editor controls update, 4 November 2026
+
+- Reverse Q/E rotation direction at Dave's request. Q now increases the stored angle; E decreases it.
+- Move size controls from W/S to A/D: A decreases width and D increases it. Update editor help, part description and usage documentation.
+- Preserve text-entry focus behaviour, transform speeds, saved markings and schema. Native control validation pending installation.
+
 ## 0.1.2 — orientation and colour correction, 4 November 2026
 
 - Fix horizontally mirrored text and pictures by deriving the right tangent from outward-normal cross up. Preserve saved position, rotation, scale and content.

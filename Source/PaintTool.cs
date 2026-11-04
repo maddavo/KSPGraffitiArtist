@@ -55,10 +55,10 @@ namespace KSPGraffitiArtist
                 if(Input.GetKeyDown(KeyCode.Escape)) {Close();return;}
                 if(!textFocused) {
                     float angle=0,size=0;
-                    if(Input.GetKey(KeyCode.Q))angle-=60*Time.unscaledDeltaTime;
-                    if(Input.GetKey(KeyCode.E))angle+=60*Time.unscaledDeltaTime;
-                    if(Input.GetKey(KeyCode.W))size-=Time.unscaledDeltaTime*.5f;
-                    if(Input.GetKey(KeyCode.S))size+=Time.unscaledDeltaTime*.5f;
+                    if(Input.GetKey(KeyCode.Q))angle+=60*Time.unscaledDeltaTime;
+                    if(Input.GetKey(KeyCode.E))angle-=60*Time.unscaledDeltaTime;
+                    if(Input.GetKey(KeyCode.A))size-=Time.unscaledDeltaTime*.5f;
+                    if(Input.GetKey(KeyCode.D))size+=Time.unscaledDeltaTime*.5f;
                     if(angle!=0 || size!=0) {draft.Rotation=MarkingData.Wrapped(draft.Rotation+angle);draft.Width=Mathf.Clamp(draft.Width+size,.1f,4f);changed=true;}
                 }
                 if(changed && Time.unscaledTime>=rebuildAt)RebuildPreview();
@@ -150,7 +150,7 @@ namespace KSPGraffitiArtist
         }
         void DrawWindow(int id)
         {
-            GUILayout.Label("Q/E rotate · W/S size · Alt + right-click: normal menu");
+            GUILayout.Label("Q/E rotate · A/D size · Alt + right-click: normal menu");
             GUILayout.Label("Width "+draft.Width.ToString("0.00")+" m   Rotation "+draft.Rotation.ToString("0")+"°");
             scroll=GUILayout.BeginScrollView(scroll,GUILayout.MaxHeight(Mathf.Max(150,Screen.height-260)));
             GUILayout.BeginHorizontal();
