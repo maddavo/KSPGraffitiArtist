@@ -1,12 +1,12 @@
 # Validation plan
 
-Status: offline validation completed for the 0.1.2 candidate, 4 November 2026. Dave's screenshot shows visible hull paint in 0.1.1, but reversed lettering and missing red tint. Corrected 0.1.2 rendering and colour remain pending native validation.
+Status: offline validation completed for the 0.1.4 candidate, 4 November 2026. The boarding/right-click regression is addressed in source and checked offline; actual painting, boarding and repeated menu opening remain pending native validation. See [PAW diagnosis](PAW-BOARDING.md).
 
 ## Completed offline evidence
 
 - Compiles against the installed KSP 1.12.5 and KIS 1.29.8039.40483 assemblies with compiler warnings treated as errors.
-- 549 assertions execute the production record codec, marking collection, surface module and font-coverage conversion. They cover Unicode/newlines, invariant-culture/randomized round-trips, bad-data bounds, missing-image references, draft isolation, failed applies, capacity, erase, repeated load, unknown records, and coverage alpha preservation independent of atlas RGB. The module is hosted with explicit ConfigNode/Unity stand-ins; this does not test the stock loader or GPU copy.
-- 13 checks inspect the actual installed assemblies and candidate DLL, and parse the can configuration using KSP's real ConfigNode parser. No Unity scene or KIS interaction is executed.
+- 556 assertions execute the production record codec, marking collection, surface module, font-coverage conversion and PAW adapter. They cover the existing data/coverage cases and null/absent/pinned menus, one stock dismissal, idempotence and reopening. PAW/menu operations use explicit host stand-ins; these do not execute KSP's actual UI lifecycle.
+- 27 checks inspect the actual installed assemblies/candidate IL and parse the can configuration with KSP's real ConfigNode parser. They verify stock dismissal/event APIs, no direct PAW Destroy calls, late-frame eligibility checking, and lock-release callbacks. No Unity scene or KIS interaction is executed.
 - 385 baseline assertions execute the production projection/orientation kernel, including exterior front/back and rotated frame handedness, asymmetric content order, hull separation, nearest/front-facing hits, holes, bounds, hierarchy traversal, and convex curved hull clearance. A locally generated read-only Mk3/#336 fixture adds 126 assertions at 63 label-area positions (511 total projection/orientation assertions on Dave's machine). Stock geometry is not bundled in the repository or package. See [diagnosis](CLIPPING-336.md) for dimensions and hashes.
 - Original can model independently parsed with the `io_object_mu` reader: six meshes, 804 vertices, four materials, four textures; 768 outward-facing triangles checked. The final model also contains a box collider. This is format/geometry evidence, not proof of loading or held orientation in KSP.
 

@@ -2,7 +2,7 @@ param([string]$KspRoot='C:\Program Files (x86)\Steam\steamapps\common\Kerbal Spa
 $ErrorActionPreference='Stop'
 $out=Join-Path $PSScriptRoot 'build'
 New-Item -ItemType Directory -Force $out | Out-Null
-$files=@('Source\MarkingData.cs','Source\FontCoverage.cs','Source\SurfaceGeometry.cs','Source\SurfaceModule.cs','Tests\Host.cs','Tests\Tests.cs','Tests\GeometryTests.cs') | ForEach-Object {Join-Path $PSScriptRoot $_}
+$files=@('Source\MarkingData.cs','Source\FontCoverage.cs','Source\PawIntegration.cs','Source\SurfaceGeometry.cs','Source\SurfaceModule.cs','Tests\Host.cs','Tests\Tests.cs','Tests\GeometryTests.cs') | ForEach-Object {Join-Path $PSScriptRoot $_}
 & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /warnaserror+ ('/out:'+(Join-Path $out 'GraffitiArtistTests.exe')) @files
 if($LASTEXITCODE -ne 0){throw 'Test compilation failed'}
 & (Join-Path $out 'GraffitiArtistTests.exe')

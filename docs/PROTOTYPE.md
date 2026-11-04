@@ -1,6 +1,8 @@
-# Building and using prototype 0.1.3
+# Building and using prototype 0.1.4
 
-0.1.3 reverses Q/E relative to 0.1.2 and moves size controls to A/D: A smaller, D larger. Native control validation is pending. No stored rotation values are rewritten.
+0.1.4 replaces unsafe PAW object destruction with normal stock dismissal/recycling and adds boarding/vessel-change/disable cleanup. See [the PAW diagnosis](PAW-BOARDING.md). Native paint/board/right-click validation is pending; restart KSP for installation to discard existing damaged menu state.
+
+Includes 0.1.3's reversed Q/E and A/D sizing: A smaller, D larger. No stored rotation values are rewritten.
 
 0.1.1 made Eagle A's label visible, confirming progress on the hull-clipping correction, but the user screenshot showed mirrored lettering and black text where red was intended. 0.1.2 corrects the horizontal frame and font-colour path; see [the diagnosis](ORIENTATION-COLOUR.md). Existing schema-1 labels are retained and regenerated on load; no save migration or repaint is required by the data format. Native corrected appearance and colour still need a game check.
 

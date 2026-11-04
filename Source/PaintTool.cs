@@ -20,11 +20,20 @@ namespace KSPGraffitiArtist
         Vector3 mouseDown;
         float downTime,rebuildAt;
         bool pendingClick,changed,textFocused,editing;
+        bool editorLockOwned;
         string status="",renderError="";
         string[] images=new string[0];
         string selectedId="";
         static bool eligibleLast;
-        void Start() { Font.textureRebuilt+=FontChanged; }
+        void Start()
+        {
+            Font.textureRebuilt+=FontChanged;
+            GameEvents.onCrewBoardVessel.Add(OnBoard);
+            GameEvents.onVesselChange.Add(OnVesselChange);
+        }
+        void OnBoard(GameEvents.FromToAction<Part,Part> transfer)
+        { if(actor!=null && transfer.from==actor)Close(); }
+        void OnVesselChange(Vessel vessel) { Close();eligibleLast=false; }
         void FontChanged(Font font) { changed=true; }
         bool Equipped(out Part eva)
         {
@@ -49,7 +58,7 @@ namespace KSPGraffitiArtist
             bool eligible=Equipped(out eva);
             if(eligible && !eligibleLast)Message("Spray can equipped: right-click a nearby hull to paint. Alt + right-click keeps the normal part menu.");
             eligibleLast=eligible;
-            if(!eligible) {pendingClick=false;if(draft!=null)Close();return;}
+            if(!eligible) {pendingClick=false;if(draft!=null || editorLockOwned)Close();return;}
             if(draft!=null) {
                 if(eva!=actor || !CanReach()) {Close();Message("Painting cancelled: tool or target is no longer in reach.");return;}
                 if(Input.GetKeyDown(KeyCode.Escape)) {Close();return;}
@@ -99,6 +108,7 @@ namespace KSPGraffitiArtist
                 surface.Suppress(selectedId);
                 images=PaintImages.Names();status="";renderError="";changed=true;textFocused=false;
                 InputLockManager.SetControlLock(ControlTypes.ALL_SHIP_CONTROLS|ControlTypes.EVA_INPUT|ControlTypes.TIMEWARP,LockName);
+                editorLockOwned=true;
                 RebuildPreview();return;
             }
         }
@@ -213,19 +223,27 @@ namespace KSPGraffitiArtist
         static void Message(string text){ScreenMessages.PostScreenMessage(text,5,ScreenMessageStyle.UPPER_CENTER);}
         void LateUpdate()
         {
-            // Close only this surface's stock context window, without disabling the controller.
-            if(draft!=null && UIPartActionController.Instance!=null) {
-                UIPartActionWindow paw=UIPartActionController.Instance.ItemListGet(target);
-                if(paw!=null)Destroy(paw.gameObject);
-            }
+            if(draft==null)return;
+            Part eva;
+            if(!Equipped(out eva) || eva!=actor){Close();return;}
+            if(Input.GetKey(KeyCode.LeftAlt)||Input.GetKey(KeyCode.RightAlt))return;
+            PawIntegration.DismissForPaint(UIPartActionController.Instance,target);
         }
         void Close()
         {
             InputLockManager.RemoveControlLock(LockName);
+            editorLockOwned=false;
             if(surface!=null)surface.Suppress(null);
             if(preview!=null){preview.Dispose();preview=null;}
             draft=null;target=null;surface=null;actor=null;textFocused=false;editing=false;pendingClick=false;
         }
-        void OnDestroy(){Close();Font.textureRebuilt-=FontChanged;PaintImages.Clear();FontCoverageAtlas.Clear();eligibleLast=false;}
+        void OnDisable(){Close();}
+        void OnDestroy()
+        {
+            Close();Font.textureRebuilt-=FontChanged;
+            GameEvents.onCrewBoardVessel.Remove(OnBoard);
+            GameEvents.onVesselChange.Remove(OnVesselChange);
+            PaintImages.Clear();FontCoverageAtlas.Clear();eligibleLast=false;
+        }
     }
 }

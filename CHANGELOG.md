@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 — safe part-menu lifecycle, 4 November 2026
+
+- Stop destroying stock PAW GameObjects. Use the stock controller's dismissal/recycling path so its window lists and mod cleanup events stay consistent. Pinned windows are retained; Alt still leaves normal part-menu interaction available.
+- Explicitly close the paint editor and release its named input lock on boarding, vessel change, component disable and scene teardown. Recheck EVA/tool eligibility before late-frame menu handling.
+- Includes the prepared 0.1.3 control changes (reversed Q/E, A/D width). No save schema or marking changes. Native paint/board/right-click validation pending.
+
 ## 0.1.3 — editor controls update, 4 November 2026
 
 - Reverse Q/E rotation direction at Dave's request. Q now increases the stored angle; E decreases it.

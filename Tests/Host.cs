@@ -27,6 +27,22 @@ public class PartModule
 public sealed class Part { public string name="testHull";public Vessel vessel=new Vessel(); }
 public sealed class Vessel { public bool packed; }
 public static class HighLogic { public static bool LoadedSceneIsFlight; }
+public sealed class UIPartActionWindow
+{
+    public Part part;public bool Pinned;
+}
+public sealed class UIPartActionController
+{
+    public readonly List<UIPartActionWindow> windows=new List<UIPartActionWindow>();
+    public readonly List<UIPartActionWindow> hidden=new List<UIPartActionWindow>();
+    public int dismissCalls,dismissEvents;
+    public UIPartActionWindow ItemListGet(Part part){return windows.Find(w=>w.part==part);}
+    public void Deselect(bool resourcesToo)
+    {
+        dismissCalls++;
+        foreach(var window in windows.ToArray())if(!window.Pinned){dismissEvents++;windows.Remove(window);hidden.Add(window);}
+    }
+}
 namespace UnityEngine
 {
     public sealed class Font { public static event Action<Font> textureRebuilt {add{} remove{}} }

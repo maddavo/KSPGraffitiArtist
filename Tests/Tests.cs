@@ -13,6 +13,22 @@ class Tests
     static int Main()
     {
         try {
+            var menuController=new UIPartActionController();var hull=new Part();
+            PawIntegration.DismissForPaint(null,hull);PawIntegration.DismissForPaint(menuController,null);
+            Check(menuController.dismissCalls==0,"null PAW inputs do nothing");
+            PawIntegration.DismissForPaint(menuController,hull);
+            Check(menuController.dismissCalls==0,"no target PAW does not dismiss unrelated UI");
+            var pinned=new UIPartActionWindow{part=hull,Pinned=true};menuController.windows.Add(pinned);
+            PawIntegration.DismissForPaint(menuController,hull);
+            Check(menuController.dismissCalls==0&&menuController.windows.Contains(pinned),"pinned PAW retained");
+            pinned.Pinned=false;PawIntegration.DismissForPaint(menuController,hull);
+            Check(menuController.dismissCalls==1&&menuController.dismissEvents==1,"native dismiss adapter invoked once");
+            Check(menuController.windows.Count==0&&menuController.hidden.Contains(pinned),"host stock path retains reusable window");
+            PawIntegration.DismissForPaint(menuController,hull);
+            Check(menuController.dismissCalls==1,"subsequent editor frame does not dismiss twice");
+            menuController.hidden.Remove(pinned);menuController.windows.Add(pinned);
+            PawIntegration.DismissForPaint(menuController,hull);
+            Check(menuController.dismissEvents==2&&menuController.hidden.Count==1,"reopened PAW can be dismissed normally again");
             Check(FontCoverage.WhiteWithCoverage(0xFF000000u)==0xFFFFFFFFu,"opaque black font RGB becomes neutral white coverage");
             Check(FontCoverage.WhiteWithCoverage(0x80000000u)==0x80FFFFFFu,"font antialias alpha preserved");
             Check(FontCoverage.WhiteWithCoverage(0x00123456u)==0x00FFFFFFu,"transparent font background stays transparent");
