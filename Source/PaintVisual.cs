@@ -44,7 +44,7 @@ namespace KSPGraffitiArtist
         public static void Clear() { foreach(Texture2D t in cache.Values)UnityEngine.Object.Destroy(t); cache.Clear();cachedPixels=0; }
     }
 
-    // A subdivided mesh is projected onto this part's own colliders; there are no decal parts or colliders.
+    // A subdivided mesh follows this part's visible hull; there are no decal parts or colliders.
     public sealed class PaintVisual : IDisposable
     {
         static Font font;
@@ -76,8 +76,7 @@ namespace KSPGraffitiArtist
         }
         void Build(Part part,MarkingData m)
         {
-            Collider[] colliders=part.GetComponentsInChildren<Collider>().Where(c=>c.enabled && !c.isTrigger && c.GetComponentInParent<Part>()==part).ToArray();
-            if(colliders.Length==0)throw new InvalidOperationException("Target has no paintable collider");
+            var surface=new VisibleSurface(part);
             Vector3 centre=part.transform.TransformPoint(new Vector3(m.X,m.Y,m.Z));
             Vector3 normal=part.transform.TransformDirection(new Vector3(m.NX,m.NY,m.NZ)).normalized;
             Vector3 up=part.transform.TransformDirection(new Vector3(m.UX,m.UY,m.UZ)).normalized;
@@ -92,7 +91,7 @@ namespace KSPGraffitiArtist
                 material.mainTexture=image; material.color=Color.white;
                 float height=m.Width*image.height/image.width;
                 if(height>4)throw new InvalidOperationException("Picture height exceeds 4 m; reduce its width.");
-                AddQuad(part,colliders,centre,normal,right,up,depth,
+                AddQuad(part,surface,centre,normal,right,up,depth,
                     -m.Width/2,-height/2,m.Width/2,height/2,new Vector2(0,0),new Vector2(1,0),new Vector2(1,1),new Vector2(0,1),vertices,uv,triangles);
             } else {
                 var generator=new TextGenerator();
@@ -118,7 +117,7 @@ namespace KSPGraffitiArtist
                     float scale=m.Width/(maxX-minX),cx=(minX+maxX)/2,cy=(minY+maxY)/2;
                     if((maxY-minY)*scale>4)throw new InvalidOperationException("Text height exceeds 4 m; reduce its width or line count.");
                     foreach(UIVertex[] q in quads) {
-                        AddQuad(part,colliders,centre,normal,right,up,depth,
+                        AddQuad(part,surface,centre,normal,right,up,depth,
                             (q[3].position.x-cx)*scale,(q[3].position.y-cy)*scale,
                             (q[1].position.x-cx)*scale,(q[1].position.y-cy)*scale,
                             q[3].uv0,q[2].uv0,q[1].uv0,q[0].uv0,vertices,uv,triangles);
@@ -131,18 +130,18 @@ namespace KSPGraffitiArtist
             mesh.SetVertices(vertices); mesh.SetUVs(0,uv); mesh.SetTriangles(triangles,0);
             mesh.RecalculateNormals(); mesh.RecalculateBounds();
         }
-        static void AddQuad(Part part,Collider[] colliders,Vector3 centre,Vector3 normal,Vector3 right,Vector3 up,float depth,
+        static void AddQuad(Part part,VisibleSurface surface,Vector3 centre,Vector3 normal,Vector3 right,Vector3 up,float depth,
             float x0,float y0,float x1,float y1,Vector2 uv00,Vector2 uv10,Vector2 uv11,Vector2 uv01,
             List<Vector3> vertices,List<Vector2> uv,List<int> triangles)
         {
-            // At most 5 cm between samples. Gaps and back-facing samples are clipped away.
-            int nx=Mathf.Clamp(Mathf.CeilToInt(Mathf.Abs(x1-x0)/.05f),1,80);
-            int ny=Mathf.Clamp(Mathf.CeilToInt(Mathf.Abs(y1-y0)/.05f),1,80);
+            // Finer sampling reduces inward chords between samples on curved hulls.
+            int nx=Mathf.Clamp(Mathf.CeilToInt(Mathf.Abs(x1-x0)/SurfaceGeometry.SampleSpacing),1,200);
+            int ny=Mathf.Clamp(Mathf.CeilToInt(Mathf.Abs(y1-y0)/SurfaceGeometry.SampleSpacing),1,200);
             Vector3[] points=new Vector3[(nx+1)*(ny+1)]; bool[] valid=new bool[points.Length];
             for(int y=0;y<=ny;y++) for(int x=0;x<=nx;x++) {
                 Vector3 plane=centre+right*Mathf.Lerp(x0,x1,(float)x/nx)+up*Mathf.Lerp(y0,y1,(float)y/ny);
                 Vector3 point;
-                int i=y*(nx+1)+x; valid[i]=Project(colliders,plane,normal,depth,out point);
+                int i=y*(nx+1)+x; valid[i]=surface.Project(plane,normal,depth,out point);
                 points[i]=part.transform.InverseTransformPoint(point);
             }
             for(int y=0;y<ny;y++)for(int x=0;x<nx;x++) {
@@ -150,7 +149,7 @@ namespace KSPGraffitiArtist
                 if(!valid[a]||!valid[b]||!valid[c]||!valid[d])continue;
                 Vector3 ignored;
                 Vector3 mid=centre+right*Mathf.Lerp(x0,x1,(x+.5f)/nx)+up*Mathf.Lerp(y0,y1,(y+.5f)/ny);
-                if(!Project(colliders,mid,normal,depth,out ignored))continue;
+                if(!surface.Project(mid,normal,depth,out ignored))continue;
                 int first=vertices.Count;
                 vertices.Add(points[a]); vertices.Add(points[b]); vertices.Add(points[c]); vertices.Add(points[d]);
                 float s0=(float)x/nx,s1=(float)(x+1)/nx,t0=(float)y/ny,t1=(float)(y+1)/ny;
@@ -160,18 +159,6 @@ namespace KSPGraffitiArtist
                 uv.Add(Vector2.Lerp(Vector2.Lerp(uv00,uv10,s0),Vector2.Lerp(uv01,uv11,s0),t1));
                 triangles.AddRange(new int[]{first,first+1,first+2,first,first+2,first+3});
             }
-        }
-        static bool Project(Collider[] colliders,Vector3 plane,Vector3 normal,float depth,out Vector3 point)
-        {
-            Ray ray=new Ray(plane+normal*depth,-normal);
-            float nearest=float.MaxValue; point=Vector3.zero; bool found=false;
-            foreach(Collider collider in colliders) {
-                RaycastHit hit;
-                if(collider.Raycast(ray,out hit,depth*2) && hit.distance<nearest && Vector3.Dot(hit.normal,normal)>.35f) {
-                    nearest=hit.distance; point=hit.point+hit.normal*.0025f; found=true;
-                }
-            }
-            return found;
         }
         public void Dispose() { UnityEngine.Object.Destroy(root); UnityEngine.Object.Destroy(mesh); UnityEngine.Object.Destroy(material); }
     }

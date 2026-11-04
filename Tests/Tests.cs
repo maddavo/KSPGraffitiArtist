@@ -78,6 +78,7 @@ class Tests
             restored.Erase(original.Id);output=new ConfigNode();restored.OnSave(output);
             Check(restored.Records.Count==0&&output.GetNodes("MARKING").Length==2,"erase retains unrecognized records");
             Console.WriteLine("PASS: "+count+" assertions using production record/store/module source.");
+            GeometryTests.Run();
             Console.WriteLine("Host substitutes ConfigNode and engine lifecycle only; no in-game result is implied.");return 0;
         }catch(Exception ex){Console.Error.WriteLine(ex);return 1;}
     }

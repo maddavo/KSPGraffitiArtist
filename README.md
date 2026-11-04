@@ -4,7 +4,7 @@ Paint text and pictures directly onto vessels already in service in Kerbal Space
 
 An EVA Kerbal carries a spray can in KIS inventory, equips it, and right-clicks a vessel surface to create a marking. A surface preview lets the player enter text or select an image, rotate it, and adjust its size before applying it. No visible plate or separate decal part needs to be attached.
 
-**Status: 0.1.0 prototype implemented and built; installation and in-game validation pending.** Offline tests cover record persistence, editing transactions, and installed API/configuration compatibility. They do not prove rendering, EVA controls, or gameplay persistence.
+**Status: 0.1.1 clipping correction prepared; installation and visual validation pending.** Dave used 0.1.0 in game and saved a label on Eagle A, but most of the marking was hidden inside the hull. The new build projects onto visible meshes instead of colliders. See the [diagnosis](docs/CLIPPING-336.md). Offline checks do not establish corrected in-game appearance.
 
 ## Why this exists
 

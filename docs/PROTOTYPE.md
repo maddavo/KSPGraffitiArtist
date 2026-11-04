@@ -1,6 +1,6 @@
-# Building and using prototype 0.1.0
+# Building and using prototype 0.1.1
 
-The candidate is built but has not been installed or run in KSP. Use a disposable test save for the initial game validation. Do not infer compatibility or successful appearance from compilation.
+The 0.1.1 correction is built but has not been installed or run in KSP. 0.1.0 loaded and saved a label in game but rendered most of it below the Mk3 Passenger Module's hull. The [read-only #336 diagnosis](CLIPPING-336.md) explains the change. Existing schema-1 labels are retained and rendered through the corrected path; no save migration is required. Appearance after the update still needs a game check.
 
 ## Build and package
 
@@ -52,7 +52,7 @@ Missing-image references remain in saved records. Restore the file and refresh p
 ## Prototype limits and recovery
 
 - Up to 32 valid markings per part, widths from 0.1–4 m and rendered height up to 4 m. Paint is not consumed.
-- Static vessel-part surfaces are the first target. Paint follows collider geometry; some parts' colliders differ from their visible hull. Animated/deployable, rescaled, variant-switched, and unusual compound-collider parts are not validated.
+- Static vessel-part surfaces are the first target. Paint follows enabled, CPU-readable visible renderer meshes on the target part; colliders are used only for clicking/reach, not paint placement. Unreadable or skinned-only hulls cannot be painted by this implementation. Animated/deployable, rescaled, variant-switched, and unusual compound-mesh parts are not validated.
 - Rendering is unlit for readable labels, rather than physically shaded spray paint. The small surface offset and transparent ordering need visual validation.
 - Save records are inside `ModuleGraffitiSurface` on each part. Docking does not use a vessel-ID map, but actual stock and KIS save/transfer behaviour still needs testing.
 - Erase is immediate when explicitly clicked; there is no undo history. Cancel preserves the previous committed record.

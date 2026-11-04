@@ -1,11 +1,11 @@
 # Technical design
 
-Status: prototype architecture, updated 4 November 2026. Core implementation now exists; native game validation remains pending. The design questions below are retained where they still require evidence.
+Status: prototype architecture, updated 4 November 2026. 0.1.0 loaded and saved a label in game; a clipping correction is prepared as 0.1.1. Corrected native appearance remains pending.
 
 ## 0.1.0 implementation
 
 - `PaintTool` queries the active EVA Kerbal's actual KIS inventories and equipped `gaSprayCan` item. It distinguishes a short right-click from camera dragging, provides the flight editor, owns the EVA/control lock during editing, and rechecks a 3 m reach and line of sight before changes.
-- `PaintVisual` tessellates text glyphs or image rectangles into meshes sampled against only the selected part's colliders. Front-facing hits receive a 2.5 mm surface offset; missing samples are clipped. Rendering uses Unity's built-in `Sprites/Default` shader. No physical marking part is created.
+- `PaintVisual` tessellates text glyphs or image rectangles at up to 20 mm sample spacing. In 0.1.1, `VisibleSurface` collects enabled readable renderer meshes owned by the target part, excludes paint meshes, and uses their model-to-part transforms. `SurfaceGeometry` intersects these triangles with a spatial hierarchy, rejects back faces, and applies a 2.5 mm lift above the visible triangle. It never uses collision geometry as a rendering fallback. Missing samples are clipped. Rendering uses Unity's built-in `Sprites/Default` shader. No physical marking part is created.
 - `ModuleGraffitiSurface` is added through ModuleManager to eligible part prefabs. It serializes committed markings inside that part's module, preserving unknown records for recovery. Existing launched vessels should receive the added prefab module through KSP's loader; this remains a required game test.
 - `MarkingData` supplies a versioned invariant-culture codec with base64 UTF-8 text and validated relative PNG names. `MarkingCollection` copies drafts on commit and returns copied snapshots, separating previews from saved data.
 - The held can uses original generated geometry and colour textures. No upstream mod asset or renderer source is bundled.
@@ -76,7 +76,7 @@ Preview and committed rendering must use consistent geometry so Apply does not m
 
 ## Decisions and remaining investigation
 
-- Surface-conforming mesh rendering is selected; actual graphics/shader compatibility and collider-to-visible-hull alignment need game validation.
+- Surface-conforming mesh rendering is selected. 0.1.0's collider projection was reproduced below the Mk3 hull; 0.1.1 follows visible triangles. Actual corrected graphics/shader appearance still needs game validation.
 - Part-module storage is selected; existing-vessel loading and KIS construction/storage transfers need game validation.
 - The initial tool is usable by any EVA Kerbal who can equip it, with 3 m reach; engineer-only restrictions are not imposed in this prototype.
 - Alt + right-click keeps normal part-menu access. The editor lists markings on the target part for deterministic overlap selection.
