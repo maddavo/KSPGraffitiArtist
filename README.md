@@ -1,0 +1,45 @@
+# KSP Graffiti Artist
+
+Paint text and pictures directly onto vessels already in service in Kerbal Space Program.
+
+An EVA Kerbal carries a spray can in KIS inventory, equips it, and right-clicks a vessel surface to create a marking. A surface preview lets the player enter text or select an image, rotate it, and adjust its size before applying it. No visible plate or separate decal part needs to be attached.
+
+**Status: design and documentation only.** There is no plugin, installable package, or tested gameplay implementation yet. Everything described below is intended behaviour, not a claim of working features.
+
+## Why this exists
+
+Modules and vessels can be difficult to identify after launch, particularly in a large station or surface base. Graffiti Artist is intended for labels such as `WORKSHOP`, `FUEL STORAGE`, `HAB 03`, arrows, and identification pictures placed during normal EVA gameplay.
+
+The player should be able to decide what a label says at the destination. Preparing individual labelled parts before launch should not be necessary.
+
+## Intended workflow
+
+1. Carry a spray can in KIS inventory and equip it on EVA.
+2. Right-click a vessel or module surface within reach to open the editor at that position.
+3. Enter text or select an image and inspect its preview on the surface.
+4. Use **Q/E** to rotate and **W/S** to decrease/increase size.
+5. Choose **Apply** to retain the marking or **Cancel** to discard the preview.
+6. With the tool equipped, right-click an existing marking to edit or erase it.
+
+While editing, movement controls must not move the Kerbal. When a text field has focus, Q, E, W, and S must type letters normally.
+
+Applied markings are intended to stay with the painted part through save/reload, scene changes, docking, and undocking. They must remain visible without the can equipped.
+
+## Documentation
+
+- [Interaction and requirements](docs/REQUIREMENTS.md): agreed behaviour, control rules, and scope.
+- [Technical design](docs/DESIGN.md): proposed components, persistence, research findings, and unresolved decisions.
+- [Development roadmap](docs/ROADMAP.md): staged implementation and evidence needed at each stage.
+- [Validation plan](docs/VALIDATION.md): offline checks and separate in-game acceptance scenarios.
+
+## Compatibility target
+
+Initial target: **KSP 1.12.5 on Windows with Kerbal Inventory System (KIS)**. This is a target, not verified compatibility. The initial use case is an EVA engineer labelling existing vessels and modules.
+
+The rendering approach and final dependencies have not been selected. Conformal Decals is a research reference, not currently a dependency. Stock EVA inventory support is not part of the initial KIS workflow.
+
+## Installation and development
+
+There is nothing to install or build yet. No live game files or saves have been changed for this project.
+
+The first prototype will investigate a marking on an already-launched curved tank, including surface alignment and save/reload persistence. See the [roadmap](docs/ROADMAP.md).
