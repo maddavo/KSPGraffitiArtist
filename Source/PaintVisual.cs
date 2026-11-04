@@ -52,6 +52,7 @@ namespace KSPGraffitiArtist
         readonly GameObject root;
         readonly Mesh mesh;
         readonly Material material;
+        Texture2D inkTexture;
         public int TriangleCount { get { return mesh.triangles.Length/3; } }
         public bool MissingImage { get; private set; }
         PaintVisual(Part part)
@@ -61,11 +62,8 @@ namespace KSPGraffitiArtist
             mesh=new Mesh(); mesh.name="Graffiti surface mesh";
             root.AddComponent<MeshFilter>().sharedMesh=mesh;
             var renderer=root.AddComponent<MeshRenderer>();
-            renderer.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
-            renderer.receiveShadows=false;
-            Shader shader=Shader.Find("Sprites/Default");
-            if(shader==null) { UnityEngine.Object.Destroy(mesh); UnityEngine.Object.Destroy(root); throw new InvalidOperationException("Sprites/Default shader missing"); }
-            material=new Material(shader); material.renderQueue=3001;
+            try { material=PaintMaterial.Create(renderer); }
+            catch { UnityEngine.Object.Destroy(mesh);UnityEngine.Object.Destroy(root);throw; }
             renderer.sharedMaterial=material;
         }
         public static PaintVisual Create(Part part,MarkingData data)
@@ -85,14 +83,15 @@ namespace KSPGraffitiArtist
             Vector3 right=VisibleSurface.RightTangent(normal,up);
             float depth=Mathf.Clamp(m.Width*.5f,.15f,1.25f);
             var vertices=new List<Vector3>(); var uv=new List<Vector2>(); var triangles=new List<int>();
+            var normals=new List<Vector3>();
             if(m.Kind=="image") {
                 Texture2D image=PaintImages.Load(m.Image); MissingImage=image==null;
                 if(image==null)return;
-                material.mainTexture=image; material.color=Color.white;
+                material.mainTexture=image;
                 float height=m.Width*image.height/image.width;
                 if(height>4)throw new InvalidOperationException("Picture height exceeds 4 m; reduce its width.");
                 AddQuad(part,surface,centre,normal,right,up,depth,
-                    -m.Width/2,-height/2,m.Width/2,height/2,new Vector2(0,0),new Vector2(1,0),new Vector2(1,1),new Vector2(0,1),vertices,uv,triangles);
+                    -m.Width/2,-height/2,m.Width/2,height/2,new Vector2(0,0),new Vector2(1,0),new Vector2(1,1),new Vector2(0,1),vertices,uv,triangles,normals);
             } else {
                 var generator=new TextGenerator();
                 try {
@@ -116,37 +115,46 @@ namespace KSPGraffitiArtist
                     if(quads.Count==0 || maxX<=minX)throw new InvalidOperationException("Text contains no visible glyphs");
                     float scale=m.Width/(maxX-minX),cx=(minX+maxX)/2,cy=(minY+maxY)/2;
                     if((maxY-minY)*scale>4)throw new InvalidOperationException("Text height exceeds 4 m; reduce its width or line count.");
+                    Vector2 minUV=new Vector2(1,1),maxUV=Vector2.zero;
+                    foreach(UIVertex[] q in quads)foreach(UIVertex vertex in q){
+                        Vector2 value=vertex.uv0;minUV=Vector2.Min(minUV,value);maxUV=Vector2.Max(maxUV,value);
+                    }
+                    Vector4 remap;
+                    inkTexture=FontCoverageAtlas.TintedRegion(PaintFont,new Color(m.R,m.G,m.B,1),minUV,maxUV,out remap);
+                    material.mainTexture=inkTexture;
                     foreach(UIVertex[] q in quads) {
                         AddQuad(part,surface,centre,normal,right,up,depth,
                             (q[3].position.x-cx)*scale,(q[3].position.y-cy)*scale,
                             (q[1].position.x-cx)*scale,(q[1].position.y-cy)*scale,
-                            q[3].uv0,q[2].uv0,q[1].uv0,q[0].uv0,vertices,uv,triangles);
+                            Remap(q[3].uv0,remap),Remap(q[2].uv0,remap),Remap(q[1].uv0,remap),Remap(q[0].uv0,remap),vertices,uv,triangles,normals);
                     }
-                    material.mainTexture=FontCoverageAtlas.Get(PaintFont);
-                    material.color=new Color(m.R,m.G,m.B,1);
                 } finally { ((IDisposable)generator).Dispose(); }
             }
             if(vertices.Count>65535)mesh.indexFormat=UnityEngine.Rendering.IndexFormat.UInt32;
             mesh.SetVertices(vertices); mesh.SetUVs(0,uv); mesh.SetTriangles(triangles,0);
-            // Sprite tint multiplies vertex colour as well as texture; specify neutral white explicitly.
+            // Neutral vertex colour; text pigment is baked into the cropped coverage texture.
             var colors=new Color32[vertices.Count];
             for(int i=0;i<colors.Length;i++)colors[i]=new Color32(255,255,255,255);
             mesh.colors32=colors;
-            mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            mesh.SetNormals(normals);mesh.RecalculateBounds();
         }
+        static Vector2 Remap(Vector2 uv,Vector4 transform)
+        { return new Vector2(uv.x*transform.x+transform.z,uv.y*transform.y+transform.w); }
         static void AddQuad(Part part,VisibleSurface surface,Vector3 centre,Vector3 normal,Vector3 right,Vector3 up,float depth,
             float x0,float y0,float x1,float y1,Vector2 uv00,Vector2 uv10,Vector2 uv11,Vector2 uv01,
-            List<Vector3> vertices,List<Vector2> uv,List<int> triangles)
+            List<Vector3> vertices,List<Vector2> uv,List<int> triangles,List<Vector3> normals)
         {
             // Finer sampling reduces inward chords between samples on curved hulls.
             int nx=Mathf.Clamp(Mathf.CeilToInt(Mathf.Abs(x1-x0)/SurfaceGeometry.SampleSpacing),1,200);
             int ny=Mathf.Clamp(Mathf.CeilToInt(Mathf.Abs(y1-y0)/SurfaceGeometry.SampleSpacing),1,200);
             Vector3[] points=new Vector3[(nx+1)*(ny+1)]; bool[] valid=new bool[points.Length];
+            Vector3[] sampleNormals=new Vector3[points.Length];
             for(int y=0;y<=ny;y++) for(int x=0;x<=nx;x++) {
                 Vector3 plane=centre+right*Mathf.Lerp(x0,x1,(float)x/nx)+up*Mathf.Lerp(y0,y1,(float)y/ny);
-                Vector3 point;
-                int i=y*(nx+1)+x; valid[i]=surface.Project(plane,normal,depth,out point);
+                Vector3 point,shading;
+                int i=y*(nx+1)+x; valid[i]=surface.Project(plane,normal,depth,out point,out shading);
                 points[i]=part.transform.InverseTransformPoint(point);
+                sampleNormals[i]=part.transform.localToWorldMatrix.transpose.MultiplyVector(shading).normalized;
             }
             for(int y=0;y<ny;y++)for(int x=0;x<nx;x++) {
                 int a=y*(nx+1)+x,b=a+1,d=a+nx+1,c=d+1;
@@ -156,6 +164,7 @@ namespace KSPGraffitiArtist
                 if(!surface.Project(mid,normal,depth,out ignored))continue;
                 int first=vertices.Count;
                 vertices.Add(points[a]); vertices.Add(points[b]); vertices.Add(points[c]); vertices.Add(points[d]);
+                normals.Add(sampleNormals[a]);normals.Add(sampleNormals[b]);normals.Add(sampleNormals[c]);normals.Add(sampleNormals[d]);
                 float s0=(float)x/nx,s1=(float)(x+1)/nx,t0=(float)y/ny,t1=(float)(y+1)/ny;
                 uv.Add(Vector2.Lerp(Vector2.Lerp(uv00,uv10,s0),Vector2.Lerp(uv01,uv11,s0),t0));
                 uv.Add(Vector2.Lerp(Vector2.Lerp(uv00,uv10,s1),Vector2.Lerp(uv01,uv11,s1),t0));
@@ -164,6 +173,6 @@ namespace KSPGraffitiArtist
                 triangles.AddRange(new int[]{first,first+2,first+1,first,first+3,first+2});
             }
         }
-        public void Dispose() { UnityEngine.Object.Destroy(root); UnityEngine.Object.Destroy(mesh); UnityEngine.Object.Destroy(material); }
+        public void Dispose() { UnityEngine.Object.Destroy(root); UnityEngine.Object.Destroy(mesh); UnityEngine.Object.Destroy(material);if(inkTexture!=null)UnityEngine.Object.Destroy(inkTexture); }
     }
 }

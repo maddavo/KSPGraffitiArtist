@@ -37,6 +37,10 @@ class Tests
                 Check(whitened==((alpha<<24)|0x00FFFFFFu),"font RGB independence and alpha "+alpha);
             }
             Check((FontCoverage.WhiteWithCoverage(0xFF000000u)&0xFF)==255,"red tint is not multiplied by black atlas RGB");
+            for(uint alpha=0;alpha<256;alpha++)
+                Check(FontCoverage.TintCoverage((alpha<<24)|0x00123456u,255,0,0)==((alpha<<24)|0x000000FFu),"red pigment and alpha "+alpha);
+            Check(FontCoverage.TintCoverage(0xFF000000u,1,127,240)==0xFFF07F01u,"RGB pigment channels preserved");
+            Check(FontCoverage.TintCoverage(0x00123456u,255,255,255)==0x00FFFFFFu,"transparent pigment remains transparent");
             var original=new MarkingData{Text="HAB 03\n燃料 🚀 = {part}\r\n",Rotation=359.9f,Width=.1f};
             MarkingData decoded;
             Check(MarkingData.TryDecode(original.Encode(),out decoded),"decode valid text");

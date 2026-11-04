@@ -19,12 +19,16 @@ namespace KSPGraffitiArtist
     }
     public struct SurfaceTriangle
     {
-        public SurfaceVector A,B,C,Normal;
+        public SurfaceVector A,B,C,Normal,NA,NB,NC;
         public SurfaceTriangle(SurfaceVector a,SurfaceVector b,SurfaceVector c,SurfaceVector outward)
         {
             A=a;B=b;C=c;Normal=SurfaceVector.Cross(b-a,c-a).Unit;
             if(SurfaceVector.Dot(Normal,outward)<0)Normal=Normal*-1;
+            NA=NB=NC=Normal;
         }
+        public SurfaceTriangle(SurfaceVector a,SurfaceVector b,SurfaceVector c,SurfaceVector na,SurfaceVector nb,SurfaceVector nc)
+            :this(a,b,c,na+nb+nc)
+        { NA=na.Unit;NB=nb.Unit;NC=nc.Unit; }
     }
     public sealed class SurfaceGeometry
     {
@@ -68,25 +72,33 @@ namespace KSPGraffitiArtist
             int half=count/2;node.Left=Build(start,half);node.Right=Build(start+half,count-half);node.Count=0;return node;
         }
         public bool Project(SurfaceVector plane,SurfaceVector normal,float depth,out SurfaceVector point)
+        { SurfaceVector shading;return Project(plane,normal,depth,out point,out shading); }
+        public bool Project(SurfaceVector plane,SurfaceVector normal,float depth,out SurfaceVector point,out SurfaceVector shading)
         {
-            point=new SurfaceVector();
+            point=new SurfaceVector();shading=new SurfaceVector();
             if(root==null || !MarkingData.Finite(depth) || depth<=0)return false;
             normal=normal.Unit;if(normal.LengthSquared<.5f)return false;
             SurfaceVector origin=plane+normal*depth,direction=normal*-1,hitNormal=new SurfaceVector();
-            float nearest=depth*2;bool found=Search(root,origin,direction,normal,ref nearest,ref hitNormal);
+            float nearest=depth*2;bool found=Search(root,origin,direction,normal,ref nearest,ref hitNormal,ref shading);
             if(found)point=origin+direction*nearest+hitNormal*Lift;
             return found;
         }
-        bool Search(Node node,SurfaceVector origin,SurfaceVector direction,SurfaceVector normal,ref float nearest,ref SurfaceVector hitNormal)
+        bool Search(Node node,SurfaceVector origin,SurfaceVector direction,SurfaceVector normal,ref float nearest,ref SurfaceVector hitNormal,ref SurfaceVector shading)
         {
             if(!HitsBox(node,origin,direction,nearest))return false;
             bool found=false;
-            if(node.Count==0){found=Search(node.Left,origin,direction,normal,ref nearest,ref hitNormal);return Search(node.Right,origin,direction,normal,ref nearest,ref hitNormal)||found;}
+            if(node.Count==0){found=Search(node.Left,origin,direction,normal,ref nearest,ref hitNormal,ref shading);return Search(node.Right,origin,direction,normal,ref nearest,ref hitNormal,ref shading)||found;}
             for(int i=node.Start;i<node.Start+node.Count;i++){
                 SurfaceTriangle t=triangles[i];
                 if(SurfaceVector.Dot(t.Normal,normal)<=.35f)continue;
-                float distance;
-                if(RayTriangle(origin,direction,t,out distance)&&distance<=nearest){nearest=distance;hitNormal=t.Normal;found=true;}
+                float distance,u,v;
+                if(RayTriangle(origin,direction,t,out distance,out u,out v)&&distance<=nearest){
+                    nearest=distance;hitNormal=t.Normal;
+                    shading=(t.NA*(1-u-v)+t.NB*u+t.NC*v).Unit;
+                    if(shading.LengthSquared<.5f)shading=t.Normal;
+                    if(SurfaceVector.Dot(shading,t.Normal)<0)shading=shading*-1;
+                    found=true;
+                }
             }
             return found;
         }
@@ -101,15 +113,15 @@ namespace KSPGraffitiArtist
             }
             return true;
         }
-        static bool RayTriangle(SurfaceVector origin,SurfaceVector direction,SurfaceTriangle t,out float distance)
+        static bool RayTriangle(SurfaceVector origin,SurfaceVector direction,SurfaceTriangle t,out float distance,out float u,out float v)
         {
-            distance=0;
+            distance=0;u=0;v=0;
             SurfaceVector edge1=t.B-t.A,edge2=t.C-t.A,p=SurfaceVector.Cross(direction,edge2);
             float det=SurfaceVector.Dot(edge1,p);if(Math.Abs(det)<1e-9f)return false;
             SurfaceVector offset=origin-t.A;
-            float u=SurfaceVector.Dot(offset,p)/det;if(u<-1e-5f||u>1.00001f)return false;
+            u=SurfaceVector.Dot(offset,p)/det;if(u<-1e-5f||u>1.00001f)return false;
             SurfaceVector q=SurfaceVector.Cross(offset,edge1);
-            float v=SurfaceVector.Dot(direction,q)/det;if(v<-1e-5f||u+v>1.00001f)return false;
+            v=SurfaceVector.Dot(direction,q)/det;if(v<-1e-5f||u+v>1.00001f)return false;
             distance=SurfaceVector.Dot(edge2,q)/det;return distance>=0;
         }
     }

@@ -1,6 +1,8 @@
-# Building and using prototype 0.1.4
+# Building and using prototype 0.1.5
 
-0.1.4 replaces unsafe PAW object destruction with normal stock dismissal/recycling and adds boarding/vessel-change/disable cleanup. See [the PAW diagnosis](PAW-BOARDING.md). Native paint/board/right-click validation is pending; restart KSP for installation to discard existing damaged menu state.
+0.1.5 replaces unlit rendering with the stock lit alpha-cutout part material, receives shadows and uses interpolated hull normals. See [lighting](LIGHTING.md). Native sun/shadow/night-side appearance remains pending. Existing markings regenerate from their saved records without a save migration.
+
+Includes 0.1.4's safe PAW lifecycle and boarding cleanup; see [PAW diagnosis](PAW-BOARDING.md).
 
 Includes 0.1.3's reversed Q/E and A/D sizing: A smaller, D larger. No stored rotation values are rewritten.
 
@@ -57,7 +59,7 @@ Missing-image references remain in saved records. Restore the file and refresh p
 
 - Up to 32 valid markings per part, widths from 0.1–4 m and rendered height up to 4 m. Paint is not consumed.
 - Static vessel-part surfaces are the first target. Paint follows enabled, CPU-readable visible renderer meshes on the target part; colliders are used only for clicking/reach, not paint placement. Unreadable or skinned-only hulls cannot be painted by this implementation. Animated/deployable, rescaled, variant-switched, and unusual compound-mesh parts are not validated.
-- Rendering is unlit for readable labels, rather than physically shaded spray paint. The small surface offset and transparent ordering need visual validation.
+- Rendering uses stock diffuse alpha-cutout lighting and received shadows, with no emission. Alpha below 0.15 is discarded; higher alpha is opaque paint. This preserves transparent backgrounds but does not provide soft/translucent gradients. The small surface offset, sun/occluder shadows and smooth hull-normal matching need visual validation. Hull normal maps and custom/PBR material effects are not copied.
 - Save records are inside `ModuleGraffitiSurface` on each part. Docking does not use a vessel-ID map, but actual stock and KIS save/transfer behaviour still needs testing.
 - Erase is immediate when explicitly clicked; there is no undo history. Cancel preserves the previous committed record.
 - Removing the addon removes its rendering. Saving without its module/ModuleManager patch may discard paint data, and missing-tool-part behaviour is governed by KSP/KIS. Back up the test save before removal; reinstallation recovery has not been established.

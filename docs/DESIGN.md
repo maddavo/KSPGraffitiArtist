@@ -1,15 +1,16 @@
 # Technical design
 
-Status: prototype architecture, updated 4 November 2026. 0.1.0 loaded and saved a label in game. The user screenshot shows 0.1.1's visible hull marking, with mirroring and colour defects. 0.1.2 corrects those paths; native validation remains pending.
+Status: prototype architecture, updated 5 November 2026. 0.1.5 addresses the reported full-bright paint in shadow. Native lighting validation remains pending; earlier rendering/UI corrections are retained.
 
 ## Current implementation
 
 - `PaintTool` queries the active EVA Kerbal's actual KIS inventories and equipped `gaSprayCan` item. It distinguishes a short right-click from camera dragging, provides the flight editor, owns the EVA/control lock during editing, and rechecks a 3 m reach and line of sight before changes.
-- `PaintVisual` tessellates text glyphs or image rectangles at up to 20 mm sample spacing. In 0.1.1, `VisibleSurface` collects enabled readable renderer meshes owned by the target part, excludes paint meshes, and uses their model-to-part transforms. `SurfaceGeometry` intersects these triangles with a spatial hierarchy, rejects back faces, and applies a 2.5 mm lift above the visible triangle. It never uses collision geometry as a rendering fallback. Missing samples are clipped. Rendering uses Unity's built-in `Sprites/Default` shader. No physical marking part is created.
+- `PaintVisual` tessellates text glyphs or image rectangles at up to 20 mm sample spacing. In 0.1.1, `VisibleSurface` collects enabled readable renderer meshes owned by the target part, excludes paint meshes, and uses their model-to-part transforms. `SurfaceGeometry` intersects these triangles with a spatial hierarchy, rejects back faces, and applies a 2.5 mm lift above the visible triangle. It never uses collision geometry as a rendering fallback. Missing samples are clipped. Rendering now uses the stock lit alpha-cutout shader described below. No physical marking part is created.
 - `ModuleGraffitiSurface` is added through ModuleManager to eligible part prefabs. It serializes committed markings inside that part's module, preserving unknown records for recovery. Existing launched vessels should receive the added prefab module through KSP's loader; this remains a required game test.
 - `MarkingData` supplies a versioned invariant-culture codec with base64 UTF-8 text and validated relative PNG names. `MarkingCollection` copies drafts on commit and returns copied snapshots, separating previews from saved data.
 - The held can uses original generated geometry and colour textures. No upstream mod asset or renderer source is bundled.
-- In 0.1.2, the horizontal tangent is `outward normal × up`, giving camera-right when viewed from outside. Font atlas alpha is copied to a cached white-RGB coverage texture; text tint multiplies neutral RGB and explicit white vertex colours. Pictures retain their source RGB. Stored anchors, rotations and colour values are not rewritten.
+- The horizontal tangent is `outward normal × up`, giving camera-right when viewed from outside. Font atlas alpha is copied to a cached coverage texture. In 0.1.5 each text visual owns a cropped pigment-coloured region and remaps glyph UVs, avoiding reliance on a stock-shader tint property. Pictures retain their RGB. Stored anchors, rotations and colour values are not rewritten.
+- `PaintMaterial` selects `KSP/Alpha/Cutoff` with alpha threshold 0.15, queue 2451 and received shadows enabled. Paint does not cast a separate shadow; the hull already does. `SurfaceGeometry` retains triangle normals for offset/front-face filtering and returns separately interpolated vertex normals for shading. `PaintVisual` supplies those normals without flat-cell recalculation. No emission or unlit fallback is configured. Part normal maps/PBR properties are not inherited.
 
 The following sections distinguish source research from implementation choices and native validation still needed.
 

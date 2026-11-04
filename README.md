@@ -4,7 +4,7 @@ Paint text and pictures directly onto vessels already in service in Kerbal Space
 
 An EVA Kerbal carries a spray can in KIS inventory, equips it, and right-clicks a vessel surface to create a marking. A surface preview lets the player enter text or select an image, rotate it, and adjust its size before applying it. No visible plate or separate decal part needs to be attached.
 
-**Status: 0.1.4 part-menu lifecycle correction prepared; native validation pending.** Stops unsafe destruction of stock part menus and explicitly releases editor controls on boarding/vessel changes. Includes reversed Q/E and A/D size controls. See [part-menu diagnosis](docs/PAW-BOARDING.md). The existing rendering and save format are retained.
+**Status: 0.1.5 lit-paint correction prepared; native lighting validation pending.** Replaces the prototype's unlit sprite material with stock lit paint, enables shadow reception and samples the hull's shading normals. Text and pictures should respond to surface lighting; this remains to be confirmed in game. See [lighting diagnosis](docs/LIGHTING.md). Part-menu fixes, Q/E and A/D controls, and the save format are retained.
 
 ## Why this exists
 

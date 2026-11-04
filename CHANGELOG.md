@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5 — lit surface paint, 5 November 2026
+
+- Replace unlit sprites with the stock KSP/Alpha/Cutoff diffuse part shader. Enable received shadows and retain hull-only shadow casting, so paint no longer intentionally maintains full brightness in shadow.
+- Interpolate the visible hull's vertex normals onto paint samples instead of recalculating flat per-cell normals.
+- Bake chosen text pigment into a cropped font-coverage texture and remap glyph UVs; do not rely on a material tint property the stock shader may lack. PNG RGB is retained.
+- Transparent backgrounds use alpha cutout at 0.15; partially transparent pixels above the threshold are opaque lit paint, not soft blending. Existing markings/schema unchanged. Native light/shadow appearance pending validation.
+
 ## 0.1.4 — safe part-menu lifecycle, 4 November 2026
 
 - Stop destroying stock PAW GameObjects. Use the stock controller's dismissal/recycling path so its window lists and mod cleanup events stay consistent. Pinned windows are retained; Alt still leaves normal part-menu interaction available.

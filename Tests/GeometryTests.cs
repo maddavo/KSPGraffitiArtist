@@ -39,6 +39,16 @@ public static class GeometryTests
             Check(screenX>last,"asymmetric glyph/picture point order");last=screenX;
         }
         var triangles=new List<SurfaceTriangle>();Plane(triangles,.05f,true);
+        SurfaceVector na=V(-.4f,0,1).Unit,nb=V(.4f,0,1).Unit,nc=V(-.4f,.3f,1).Unit;
+        var smooth=new SurfaceGeometry(new[]{new SurfaceTriangle(V(-1,-1,0),V(1,-1,0),V(-1,1,0),na,nb,nc)});
+        SurfaceVector smoothPoint,smoothNormal;
+        Check(smooth.Project(V(-.5f,-.5f,0),V(0,0,1),.5f,out smoothPoint,out smoothNormal),"smooth-normal surface hit");
+        SurfaceVector expectedNormal=(na*.5f+nb*.25f+nc*.25f).Unit;
+        Check((smoothNormal-expectedNormal).LengthSquared<1e-10f,"barycentric hull normals preserved");
+        Check(Math.Abs(smoothNormal.LengthSquared-1)<1e-5f&&smoothNormal.Z>0,"unit outward shading normal");
+        Check(Math.Abs(smoothPoint.Z-SurfaceGeometry.Lift)<1e-6f,"lift still follows geometry rather than smooth shading normal");
+        var flat=new SurfaceGeometry(new[]{new SurfaceTriangle(V(-1,-1,0),V(1,-1,0),V(-1,1,0),V(0,0,1))});
+        Check(flat.Project(V(-.5f,-.5f,0),V(0,0,1),.5f,out smoothPoint,out smoothNormal)&&smoothNormal.Z>.999f,"flat-normal fallback retained");
         var visible=new SurfaceGeometry(triangles);SurfaceVector hit;
         Check(visible.Project(V(0,0,0),V(0,0,1),.5f,out hit),"hit visible hull beyond original collider");
         Check(Math.Abs(hit.Z-.0525f)<1e-6f,"lift is relative to visible hull, not collider at z=0");

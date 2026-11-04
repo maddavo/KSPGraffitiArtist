@@ -1,13 +1,13 @@
 # Validation plan
 
-Status: offline validation completed for the 0.1.4 candidate, 4 November 2026. The boarding/right-click regression is addressed in source and checked offline; actual painting, boarding and repeated menu opening remain pending native validation. See [PAW diagnosis](PAW-BOARDING.md).
+Status: offline validation completed for the 0.1.5 candidate, 5 November 2026. Lit paint replaces the reported glowing-in-shadow path. Native lighting, shadow reception and visual colour remain pending; see [lighting diagnosis](LIGHTING.md). Prior gameplay checks remain pending where not confirmed by Dave.
 
 ## Completed offline evidence
 
 - Compiles against the installed KSP 1.12.5 and KIS 1.29.8039.40483 assemblies with compiler warnings treated as errors.
-- 556 assertions execute the production record codec, marking collection, surface module, font-coverage conversion and PAW adapter. They cover the existing data/coverage cases and null/absent/pinned menus, one stock dismissal, idempotence and reopening. PAW/menu operations use explicit host stand-ins; these do not execute KSP's actual UI lifecycle.
-- 27 checks inspect the actual installed assemblies/candidate IL and parse the can configuration with KSP's real ConfigNode parser. They verify stock dismissal/event APIs, no direct PAW Destroy calls, late-frame eligibility checking, and lock-release callbacks. No Unity scene or KIS interaction is executed.
-- 385 baseline assertions execute the production projection/orientation kernel, including exterior front/back and rotated frame handedness, asymmetric content order, hull separation, nearest/front-facing hits, holes, bounds, hierarchy traversal, and convex curved hull clearance. A locally generated read-only Mk3/#336 fixture adds 126 assertions at 63 label-area positions (511 total projection/orientation assertions on Dave's machine). Stock geometry is not bundled in the repository or package. See [diagnosis](CLIPPING-336.md) for dimensions and hashes.
+- 814 assertions execute the production record codec, marking collection, surface module, font/pigment conversion and PAW adapter. They include every alpha value's preservation under coloured pigment. PAW/menu operations use explicit host stand-ins; these do not execute KSP's actual UI lifecycle.
+- 35 checks inspect installed assemblies/candidate IL and parse the can configuration with KSP's real ConfigNode parser. Alongside menu/cleanup checks they verify stock-lit shader selection, shadow-reception configuration, explicit sampled mesh normals and pigment texture generation. No Unity scene, shader execution or KIS interaction is executed.
+- 390 baseline assertions execute the production projection/orientation kernel, now including barycentric shading normals and independent geometric lift. The local Mk3/#336 fixture adds 126 assertions at 63 positions (516 total on Dave's machine). Stock geometry is not bundled in the repository or package. See [diagnosis](CLIPPING-336.md).
 - Original can model independently parsed with the `io_object_mu` reader: six meshes, 804 vertices, four materials, four textures; 768 outward-facing triangles checked. The final model also contains a box collider. This is format/geometry evidence, not proof of loading or held orientation in KSP.
 
 `build.ps1`, `test.ps1`, and `package.ps1` reproduce the build, persistence/API checks, and candidate package. Package receipts retain artifact/dependency hashes and the source revision.

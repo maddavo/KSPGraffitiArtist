@@ -45,5 +45,27 @@ namespace KSPGraffitiArtist
             if(coverage!=null)UnityEngine.Object.Destroy(coverage);
             coverage=null;cachedFont=null;source=null;dirty=true;
         }
+        public static Texture2D TintedRegion(Font font,Color color,Vector2 minUV,Vector2 maxUV,out Vector4 remap)
+        {
+            Texture2D atlas=Get(font);
+            int left=Mathf.Clamp(Mathf.FloorToInt(minUV.x*atlas.width)-1,0,atlas.width-1);
+            int bottom=Mathf.Clamp(Mathf.FloorToInt(minUV.y*atlas.height)-1,0,atlas.height-1);
+            int right=Mathf.Clamp(Mathf.CeilToInt(maxUV.x*atlas.width)+1,left+1,atlas.width);
+            int top=Mathf.Clamp(Mathf.CeilToInt(maxUV.y*atlas.height)+1,bottom+1,atlas.height);
+            int width=right-left,height=top-bottom;
+            var region=new Texture2D(width,height,TextureFormat.RGBA32,false);
+            try {
+                Color32 ink=color;
+                Color32[] original=atlas.GetPixels32(),pixels=new Color32[width*height];
+                for(int y=0;y<height;y++)for(int x=0;x<width;x++){
+                    Color32 p=original[(bottom+y)*atlas.width+left+x];
+                    uint packed=FontCoverage.TintCoverage((uint)p.a<<24,ink.r,ink.g,ink.b);
+                    pixels[y*width+x]=new Color32((byte)packed,(byte)(packed>>8),(byte)(packed>>16),(byte)(packed>>24));
+                }
+                region.SetPixels32(pixels);region.Apply(false,true);region.wrapMode=TextureWrapMode.Clamp;region.filterMode=atlas.filterMode;
+                remap=new Vector4((float)atlas.width/width,(float)atlas.height/height,-(float)left/width,-(float)bottom/height);
+                return region;
+            }catch{UnityEngine.Object.Destroy(region);throw;}
+        }
     }
 }
