@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6 — fresh glyph capture, 5 November 2026
+
+- Explicitly request the label's characters before layout and capture current font atlas pixels for every text build. Do not treat texture identity, size or textureRebuilt as a pixel-content version: fonts can add letters in place.
+- Reuse the scratch texture allocation while refreshing its pixels. Owned pigment crops remain independent of later font updates. Keep lighting, placement offset, records and schema unchanged.
+- Reproduced the stale E-only capture with production atlas code and added a passing regression; added read-only #342 Eagle 1 hull samples. Native missing-letter correction pending installation/testing. Dave confirmed 0.1.5 lighting is good.
+
 ## 0.1.5 — lit surface paint, 5 November 2026
 
 - Replace unlit sprites with the stock KSP/Alpha/Cutoff diffuse part shader. Enable received shadows and retain hull-only shadow casting, so paint no longer intentionally maintains full brightness in shadow.

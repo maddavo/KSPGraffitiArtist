@@ -42,7 +42,7 @@ class InstalledApi
             Type module=plugin.GetType("KSPGraffitiArtist.ModuleGraffitiSurface");
             Check(module!=null && module.BaseType==gameAssembly.GetType("PartModule"),"part-module base");
             Check(plugin.GetType("KSPGraffitiArtist.PaintTool").GetCustomAttributes(false).Any(a=>a.GetType().Name=="KSPAddon"),"flight addon attribute");
-            Check(plugin.GetName().Version.ToString()=="0.1.5.0","assembly version");
+            Check(plugin.GetName().Version.ToString()=="0.1.6.0","assembly version");
             Type inventory=kis.GetType("KIS.ModuleKISInventory"),item=kis.GetType("KIS.KIS_Item");
             Check(inventory.GetField("items")!=null,"KIS inventory items");
             Check(item.GetProperty("equipped")!=null,"KIS equipped property");
@@ -64,6 +64,7 @@ class InstalledApi
             Check(visualBuild.Any(m=>m.Name=="SetNormals"),"visual supplies sampled hull shading normals");
             Check(!visualBuild.Any(m=>m.Name=="RecalculateNormals"),"visual does not replace smooth hull normals with cell normals");
             Check(visualBuild.Any(m=>m.Name=="TintedRegion"),"lit text texture contains pigment rather than relying on shader tint");
+            Check(visualBuild.Any(m=>m.Name=="RequestCharactersInTexture"),"text glyphs explicitly requested before capture");
             Check(Calls(plugin.GetType("KSPGraffitiArtist.FontCoverageAtlas").GetMethod("TintedRegion")).Any(m=>m.Name=="TintCoverage"),"texture tint path uses checked coverage conversion");
             var dismiss=Calls(plugin.GetType("KSPGraffitiArtist.PawIntegration").GetMethod("DismissForPaint"));
             Check(dismiss.Any(m=>m.Name=="Deselect"&&m.DeclaringType.Name=="UIPartActionController"),"candidate invokes native PAW dismissal");

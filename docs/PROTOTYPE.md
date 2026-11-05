@@ -1,6 +1,6 @@
-# Building and using prototype 0.1.5
+# Building and using prototype 0.1.6
 
-0.1.5 replaces unlit rendering with the stock lit alpha-cutout part material, receives shadows and uses interpolated hull normals. See [lighting](LIGHTING.md). Native sun/shadow/night-side appearance remains pending. Existing markings regenerate from their saved records without a save migration.
+Dave confirmed 0.1.5 lighting is good. 0.1.6 addresses missing letters in Eagle 1's label by requesting glyphs and recapturing the current font texture after each layout, including in-place texture updates. See [Eagle 1 diagnosis](GLYPHS-342.md). Native completeness of the label remains pending. Existing markings regenerate from saved records without a save migration or repaint.
 
 Includes 0.1.4's safe PAW lifecycle and boarding cleanup; see [PAW diagnosis](PAW-BOARDING.md).
 

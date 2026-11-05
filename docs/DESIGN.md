@@ -1,6 +1,6 @@
 # Technical design
 
-Status: prototype architecture, updated 5 November 2026. 0.1.5 addresses the reported full-bright paint in shadow. Native lighting validation remains pending; earlier rendering/UI corrections are retained.
+Status: prototype architecture, updated 5 November 2026. Dave confirmed 0.1.5 lighting is good. 0.1.6 corrects a reproduced stale-glyph capture path; native missing-letter validation remains pending.
 
 ## Current implementation
 
@@ -9,7 +9,7 @@ Status: prototype architecture, updated 5 November 2026. 0.1.5 addresses the rep
 - `ModuleGraffitiSurface` is added through ModuleManager to eligible part prefabs. It serializes committed markings inside that part's module, preserving unknown records for recovery. Existing launched vessels should receive the added prefab module through KSP's loader; this remains a required game test.
 - `MarkingData` supplies a versioned invariant-culture codec with base64 UTF-8 text and validated relative PNG names. `MarkingCollection` copies drafts on commit and returns copied snapshots, separating previews from saved data.
 - The held can uses original generated geometry and colour textures. No upstream mod asset or renderer source is bundled.
-- The horizontal tangent is `outward normal × up`, giving camera-right when viewed from outside. Font atlas alpha is copied to a cached coverage texture. In 0.1.5 each text visual owns a cropped pigment-coloured region and remaps glyph UVs, avoiding reliance on a stock-shader tint property. Pictures retain their RGB. Stored anchors, rotations and colour values are not rewritten.
+- The horizontal tangent is `outward normal × up`, giving camera-right when viewed from outside. Each text visual owns a cropped pigment-coloured region and remaps glyph UVs, avoiding reliance on a stock-shader tint property. In 0.1.6 glyphs are requested before layout and font atlas pixels are recaptured for every text build, reusing the scratch allocation but not stale contents. Texture identity/size and rebuild events are not treated as content versions. Pictures retain their RGB. Stored anchors, rotations and colour values are not rewritten.
 - `PaintMaterial` selects `KSP/Alpha/Cutoff` with alpha threshold 0.15, queue 2451 and received shadows enabled. Paint does not cast a separate shadow; the hull already does. `SurfaceGeometry` retains triangle normals for offset/front-face filtering and returns separately interpolated vertex normals for shading. `PaintVisual` supplies those normals without flat-cell recalculation. No emission or unlit fallback is configured. Part normal maps/PBR properties are not inherited.
 
 The following sections distinguish source research from implementation choices and native validation still needed.

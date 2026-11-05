@@ -1,13 +1,14 @@
 # Validation plan
 
-Status: offline validation completed for the 0.1.5 candidate, 5 November 2026. Lit paint replaces the reported glowing-in-shadow path. Native lighting, shadow reception and visual colour remain pending; see [lighting diagnosis](LIGHTING.md). Prior gameplay checks remain pending where not confirmed by Dave.
+Status: offline validation completed for the 0.1.6 candidate, 5 November 2026. Dave confirmed lighting is good in 0.1.5. The missing-letter regression in the font snapshot path is reproduced before the correction and passing after it; native label completeness remains pending. See [Eagle 1/#342](GLYPHS-342.md).
 
 ## Completed offline evidence
 
 - Compiles against the installed KSP 1.12.5 and KIS 1.29.8039.40483 assemblies with compiler warnings treated as errors.
 - 814 assertions execute the production record codec, marking collection, surface module, font/pigment conversion and PAW adapter. They include every alpha value's preservation under coloured pigment. PAW/menu operations use explicit host stand-ins; these do not execute KSP's actual UI lifecycle.
-- 35 checks inspect installed assemblies/candidate IL and parse the can configuration with KSP's real ConfigNode parser. Alongside menu/cleanup checks they verify stock-lit shader selection, shadow-reception configuration, explicit sampled mesh normals and pigment texture generation. No Unity scene, shader execution or KIS interaction is executed.
-- 390 baseline assertions execute the production projection/orientation kernel, now including barycentric shading normals and independent geometric lift. The local Mk3/#336 fixture adds 126 assertions at 63 positions (516 total on Dave's machine). Stock geometry is not bundled in the repository or package. See [diagnosis](CLIPPING-336.md).
+- 36 checks inspect installed assemblies/candidate IL and parse the can configuration with KSP's real ConfigNode parser. Alongside prior menu/material checks they verify explicit glyph requests. No Unity scene, shader execution or KIS interaction is executed.
+- 390 baseline assertions execute the production projection/orientation kernel. Local Mk3 fixtures add 126 assertions at 63 #336 positions and 210 assertions at 105 #342 Eagle 1 positions (726 total on Dave's machine). Stock geometry is not bundled in the repository or package.
+- 15 assertions execute the actual production FontCoverageAtlas capture/crop code against explicit CPU readback stand-ins. In-place glyph additions with unchanged texture reference/size and no rebuild event fail under the old code and pass under 0.1.6. Tests also cover pigment/alpha, independent owned crops, resizing, target restoration and teardown. GPU timing is not simulated. Total offline checks on Dave's machine: 1,591.
 - Original can model independently parsed with the `io_object_mu` reader: six meshes, 804 vertices, four materials, four textures; 768 outward-facing triangles checked. The final model also contains a box collider. This is format/geometry evidence, not proof of loading or held orientation in KSP.
 
 `build.ps1`, `test.ps1`, and `package.ps1` reproduce the build, persistence/API checks, and candidate package. Package receipts retain artifact/dependency hashes and the source revision.

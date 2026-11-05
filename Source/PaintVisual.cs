@@ -95,6 +95,7 @@ namespace KSPGraffitiArtist
             } else {
                 var generator=new TextGenerator();
                 try {
+                    PaintFont.RequestCharactersInTexture(m.Text,96,FontStyle.Normal);
                     var settings=new TextGenerationSettings {
                         font=PaintFont,fontSize=96,fontStyle=FontStyle.Normal,color=Color.white,
                         lineSpacing=1,richText=false,scaleFactor=1,textAnchor=TextAnchor.MiddleCenter,

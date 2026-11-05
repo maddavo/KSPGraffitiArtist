@@ -7,6 +7,11 @@ $files=@('Source\MarkingData.cs','Source\FontCoverage.cs','Source\PawIntegration
 if($LASTEXITCODE -ne 0){throw 'Test compilation failed'}
 & (Join-Path $out 'GraffitiArtistTests.exe')
 if($LASTEXITCODE -ne 0){throw 'Offline tests failed'}
+$atlasFiles=@('Source\FontCoverage.cs','Source\FontCoverageAtlas.cs','Tests\FontAtlasHost.cs','Tests\FontAtlasTests.cs') | ForEach-Object {Join-Path $PSScriptRoot $_}
+& "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /warnaserror+ ('/out:'+(Join-Path $out 'FontAtlasTests.exe')) @atlasFiles
+if($LASTEXITCODE -ne 0){throw 'Atlas-host test compilation failed'}
+& (Join-Path $out 'FontAtlasTests.exe')
+if($LASTEXITCODE -ne 0){throw 'Font atlas capture regression failed'}
 if(Test-Path -LiteralPath (Join-Path $out 'KSPGraffitiArtist.dll')){
     & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /warnaserror+ ('/out:'+(Join-Path $out 'InstalledApi.exe')) (Join-Path $PSScriptRoot 'Tests\InstalledApi.cs')
     if($LASTEXITCODE -ne 0){throw 'API-check compilation failed'}

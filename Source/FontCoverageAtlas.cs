@@ -5,25 +5,22 @@ namespace KSPGraffitiArtist
 {
     public static class FontCoverageAtlas
     {
-        static Font cachedFont;
-        static Texture source;
         static Texture2D coverage;
-        static bool dirty=true;
-        static FontCoverageAtlas(){Font.textureRebuilt+=Changed;}
-        static void Changed(Font font){if(font==cachedFont)dirty=true;}
         public static Texture2D Get(Font font)
         {
             Texture atlas=font.material.mainTexture;
             if(atlas==null)throw new InvalidOperationException("Font atlas is unavailable");
-            if(!dirty && cachedFont==font && source==atlas && coverage!=null)return coverage;
+            // Texture identity/size and textureRebuilt do not prove pixel content is unchanged.
+            // Dynamic fonts may add glyphs in place, so capture current pixels after each layout.
             // Dynamic font textures may not be CPU-readable; copy through a temporary render target.
             RenderTexture previous=RenderTexture.active;
             RenderTexture temporary=RenderTexture.GetTemporary(atlas.width,atlas.height,0,RenderTextureFormat.ARGB32,RenderTextureReadWrite.Linear);
-            Texture2D next=null;
+            Texture2D next=coverage;
+            bool allocate=next==null || next.width!=atlas.width || next.height!=atlas.height;
             try {
                 Graphics.Blit(atlas,temporary);
                 RenderTexture.active=temporary;
-                next=new Texture2D(atlas.width,atlas.height,TextureFormat.RGBA32,false);
+                if(allocate)next=new Texture2D(atlas.width,atlas.height,TextureFormat.RGBA32,false);
                 next.ReadPixels(new Rect(0,0,atlas.width,atlas.height),0,0,false);
                 Color32[] pixels=next.GetPixels32();
                 for(int i=0;i<pixels.Length;i++){
@@ -34,16 +31,16 @@ namespace KSPGraffitiArtist
                 }
                 next.SetPixels32(pixels);next.Apply(false,false);
                 next.wrapMode=TextureWrapMode.Clamp;next.filterMode=atlas.filterMode;
-                if(coverage!=null)UnityEngine.Object.Destroy(coverage);
-                coverage=next;cachedFont=font;source=atlas;dirty=false;
+                if(coverage!=null && coverage!=next)UnityEngine.Object.Destroy(coverage);
+                coverage=next;
                 return coverage;
-            }catch{if(next!=null)UnityEngine.Object.Destroy(next);throw;}
+            }catch{if(allocate && next!=null)UnityEngine.Object.Destroy(next);throw;}
             finally{RenderTexture.active=previous;RenderTexture.ReleaseTemporary(temporary);}
         }
         public static void Clear()
         {
             if(coverage!=null)UnityEngine.Object.Destroy(coverage);
-            coverage=null;cachedFont=null;source=null;dirty=true;
+            coverage=null;
         }
         public static Texture2D TintedRegion(Font font,Color color,Vector2 minUV,Vector2 maxUV,out Vector4 remap)
         {

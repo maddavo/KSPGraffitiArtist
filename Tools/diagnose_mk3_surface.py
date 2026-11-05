@@ -1,7 +1,7 @@
 """Read-only Eagle A/#336 reproduction; writes only a local report and optional test fixture.
 
 Requires a separately obtained io_object_mu mu.py reader (not bundled). Usage:
-  py -3 Tools/diagnose_mk3_surface.py <reader-directory> <KSP-root> <quicksave.sfs> <output-directory>
+  py -3 Tools/diagnose_mk3_surface.py <reader-directory> <KSP-root> <quicksave.sfs> <output-directory> [vessel-name [half-height]]
 Stock mesh geometry in the generated fixture is local test evidence, not a redistributable asset.
 """
 import base64
@@ -19,6 +19,11 @@ except ImportError:
     from mu_reference import Mu
 
 game, save, out = Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4])
+wanted_vessel = sys.argv[5] if len(sys.argv) > 5 else 'Eagle A'
+rows = (-.08, 0, .08)
+if len(sys.argv) > 6:
+    half_height = float(sys.argv[6])
+    rows = (-half_height, -half_height/2, 0, half_height/2, half_height)
 out.mkdir(parents=True, exist_ok=True)
 source = game / 'GameData/Squad/Parts/FuelTank/mk3Fuselage/CREW.mu'
 model = Mu().read(str(source))
@@ -72,14 +77,14 @@ for line in save.open(encoding='utf-8-sig'):
         if stack and stack[-1][0] == 'MARKING':
             vessel = next((v for n, v in reversed(stack) if n == 'VESSEL'), {})
             part = next((v for n, v in reversed(stack) if n == 'PART'), {})
-            if vessel.get('name') == 'Eagle A' and part.get('name') == 'mk3CrewCabin':
+            if vessel.get('name') == wanted_vessel and part.get('name') == 'mk3CrewCabin':
                 markings.append(dict(stack[-1][1], part_uid=part.get('uid')))
         if stack: stack.pop()
     elif '=' in s and stack:
         k, v = s.split('=', 1); stack[-1][1][k.strip()] = v.strip()
     elif s: pending = s
 
-if len(markings) != 1: raise RuntimeError('Expected the single Eagle A Mk3 label in #336')
+if len(markings) != 1: raise RuntimeError('Expected one marked Mk3 part on ' + wanted_vessel)
 m = markings[0]
 visible = [tri for obj in model.obj.children if hasattr(obj, 'shared_mesh') and hasattr(obj, 'renderer') for tri in mesh_triangles(obj)]
 collider_obj = next(o for o in model.obj.children if o.transform.name == 'Mk3COL')
@@ -89,9 +94,9 @@ normal = unit(tuple(float(m[k]) for k in ('nx', 'ny', 'nz')))
 up = unit(tuple(float(m[k]) for k in ('ux', 'uy', 'uz')))
 angle = math.radians(-float(m['rotation']))
 up = add(mul(up, math.cos(angle)), add(mul(cross(normal, up), math.sin(angle)), mul(normal, dot(normal, up)*(1-math.cos(angle)))))
-right = cross(up, normal)
+right = cross(normal, up)
 samples, gaps = [], []
-for row in (-.08, 0, .08):
+for row in rows:
     for i in range(21):
         plane = add(centre, add(mul(right, (i/20-.5)*float(m['width'])), mul(up, row)))
         origin, direction = add(plane, mul(normal, 1.1)), mul(normal, -1)
@@ -111,6 +116,7 @@ with (out / 'mk3-surface-fixture.bin').open('wb') as f:
     f.write(struct.pack('<i', len(samples)))
     for plane, n, expected in samples: f.write(struct.pack('<7f', *plane, *n, expected))
 report = dict(save=str(save), save_sha256=hashlib.sha256(save.read_bytes()).hexdigest(),
+              vessel=wanted_vessel,
               model=str(source), model_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
               label=base64.b64decode(m['text64']).decode('utf8'), marking=m,
               matched_samples=len(samples), visible_minus_collider_mm=dict(min=min(gaps), max=max(gaps), mean=sum(gaps)/len(gaps)),

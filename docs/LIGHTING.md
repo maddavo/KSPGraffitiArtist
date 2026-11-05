@@ -1,5 +1,7 @@
 # Paint remains bright in shadow
 
+Dave subsequently confirmed the lighting is good in 0.1.5 (5 November 2026). The following missing-letter investigation retains this lit material and shading path.
+
 5 November 2026: Dave reports the design looks as though it glows when the vessel surface is in shadow and requests paint that responds to the part's shading.
 
 The code confirms the cause: `Sprites/Default` is an unlit presentation path, and the paint renderer explicitly disabled received shadows. Surface geometry alone cannot make an unlit material follow hull lighting. This was a prototype limitation, not intended final paint behaviour.

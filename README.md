@@ -4,7 +4,7 @@ Paint text and pictures directly onto vessels already in service in Kerbal Space
 
 An EVA Kerbal carries a spray can in KIS inventory, equips it, and right-clicks a vessel surface to create a marking. A surface preview lets the player enter text or select an image, rotate it, and adjust its size before applying it. No visible plate or separate decal part needs to be attached.
 
-**Status: 0.1.5 lit-paint correction prepared; native lighting validation pending.** Replaces the prototype's unlit sprite material with stock lit paint, enables shadow reception and samples the hull's shading normals. Text and pictures should respond to surface lighting; this remains to be confirmed in game. See [lighting diagnosis](docs/LIGHTING.md). Part-menu fixes, Q/E and A/D controls, and the save format are retained.
+**Status: 0.1.6 missing-glyph correction prepared; native glyph validation pending.** Dave confirmed the lighting is good, but Eagle 1's new label showed only some letters. The complete text is saved; a reproduced stale font-snapshot bug is corrected by capturing current glyph pixels after each layout. See [Eagle 1 diagnosis](docs/GLYPHS-342.md). Lit paint, surface placement, controls and the save format are retained.
 
 ## Why this exists
 

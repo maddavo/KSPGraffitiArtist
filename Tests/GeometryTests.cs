@@ -84,7 +84,8 @@ public static class GeometryTests
             float squared=hit.X*hit.X+hit.Z*hit.Z;
             Check(squared>radius*radius,"paint outside visible curved hull "+i);
         }
-        string fixture=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"mk3-surface-fixture.bin");
+        foreach(string name in new[]{"mk3-surface-fixture.bin","eagle1-342/mk3-surface-fixture.bin"}){
+        string fixture=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,name);
         if(File.Exists(fixture)){
             using(var reader=new BinaryReader(File.OpenRead(fixture))){
                 int number=reader.ReadInt32();var realHull=new List<SurfaceTriangle>();
@@ -98,8 +99,9 @@ public static class GeometryTests
                     Check(visible.Project(plane,normal,1.1f,out hit),"actual Mk3 saved-label sample "+i);
                     Check(Math.Abs(SurfaceVector.Dot(hit-plane,normal)-expected)<.0001f,"Mk3 hull clearance agrees with independent raycast "+i);
                 }
-                Console.WriteLine("Read-only actual Mk3/Eagle A fixture: "+number+" visible triangles, "+samples+" label samples.");
+                Console.WriteLine("Read-only actual Mk3 fixture "+name+": "+number+" visible triangles, "+samples+" label samples.");
             }
+        }
         }
         Console.WriteLine("PASS: "+count+" production surface-projection assertions (offline).");return count;
     }
