@@ -15,6 +15,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $addon 'Plugins') | Out-Null
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'build\KSPGraffitiArtist.dll') -Destination (Join-Path $addon 'Plugins')
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'README.md') -Destination (Join-Path $addon 'README.md')
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'LICENSE') -Destination (Join-Path $addon 'LICENSE')
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'docs') -Destination (Join-Path $addon 'docs') -Recurse
     $sourceArchive=Join-Path $candidate 'source-0.2.5.zip'
     git archive --format=zip ('--output='+$sourceArchive) HEAD

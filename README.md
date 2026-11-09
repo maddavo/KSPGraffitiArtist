@@ -1,16 +1,10 @@
 # KSP Graffiti Artist
 
-Paint text and pictures directly onto vessels, planet surfaces and KK objects already in Kerbal Space Program.
+Paint text and pictures directly onto vessels already in service, planetary surfaces and Kerbal Konstructs objects in Kerbal Space Program.
 
-An EVA Kerbal carries a spray can in KIS inventory, equips it, and right-clicks a vessel surface to create a marking. A surface preview lets the player enter text or select an image, rotate it, and adjust its size before applying it. No visible plate or separate decal part needs to be attached.
+An EVA Kerbal equips a spray can from KIS inventory and right-clicks a nearby surface to create, edit or erase a marking. No separate decal plate or pre-launch preparation is required. Any Kerbal can use the can; it is not restricted to Engineers.
 
-**Status: 0.2.5 supports vessel, KK and terrain painting, installed-font selection, custom PNGs and stackable KIS spray cans.** The latest KK targeting correction is user-confirmed. See the [validation notes](docs/VALIDATION.md) for offline checks and remaining test coverage.
-
-## Why this exists
-
-Modules and vessels can be difficult to identify after launch, particularly in a large station or surface base. Graffiti Artist is intended for labels such as `WORKSHOP`, `FUEL STORAGE`, `HAB 03`, arrows, and identification pictures placed during normal EVA gameplay.  Planet surface locations sometimes need markings, biome borders, landing sites, navigation markings, notes, plans.
-
-The player should be able to decide what a label says at the destination. Preparing individual labelled parts before launch should not be necessary.
+**Current release: 0.2.5 — KSP 1.12.5 on Windows.** Vessel labels, KK painting and image use have been demonstrated in game. See the [validation notes](docs/VALIDATION.md) for individual regression checks and test limitations.
 
 ## In-game examples
 
@@ -22,50 +16,78 @@ Apply a custom image to a vessel already in service. Here, a Qantas logo follows
 
 ### Surface wayfinding
 
-Combine coloured text and markings to identify biomes at a surface base. These painted markings show a tri-biome location at a Kerbal Konstructs landing pad.  Here markings are painted on the Mun surface and on a KK object.
+Combine coloured text and markings to identify biomes at a surface base. These painted markings show a tri-biome location at a Kerbal Konstructs landing pad, with paint on both the Mun surface and a KK object.
 
 ![Yellow East Crater, Midlands and Canyons labels with dashed directional markings on and beside a landing pad.](docs/images/surface-wayfinding.jpg)
 
-## Intended workflow
+## Requirements
 
-1. Carry a spray can in KIS inventory and equip it on EVA.
-2. Right-click a vessel part, KK instance or solid planetary terrain within reach to open the editor at that position.
-3. Enter text and choose its font, style and colour, or select an image. Inspect the preview on the surface.
-4. Use **I/J/K/L** to move (up/left/down/right), **Q/E** to rotate and **A/D** to decrease/increase size.
-5. Choose **Apply** to retain the marking or **Cancel** to discard the preview.
-6. With the tool equipped, right-click an existing marking to edit or erase it.
+- **Kerbal Space Program 1.12.5 on Windows.** Linux and macOS are not validated; the registered-font fallback uses Windows APIs.
+- **Kerbal Inventory System (KIS)** — built against KIS 1.29 and its bundled KSPDev utilities. Install KIS normally; the release does not bundle these dependencies.
+- **ModuleManager**, required to enable painting on vessel parts.
+- **Kerbal Konstructs is optional**, needed only for painting KK instances.
 
-While editing, movement controls must not move the Kerbal. When a text field has focus, I/J/K/L, Q/E and A/D type letters normally. Click another editor control to use placement controls. Movement follows the original surface axes independently of decal rotation, at 0.25 m/s, and stops at the selected hull edge or the 3 m reach limit.
+Conformal Decals is not required. Stock EVA inventory is not supported; use KIS inventory.
 
-Applied markings are intended to stay with the painted part through save/reload, scene changes, docking, and undocking. They must remain visible without the can equipped.
+## Installation
 
-Font choices use installed system fonts; styles are Regular, Bold, Italic and Bold Italic. Edges now use blended alpha coverage instead of a hard cutoff. See [font and edge details](docs/FONTS-EDGES.md), including save compatibility and pending lighting checks.
+1. Install KIS and ModuleManager, then close KSP.
+2. Download **KSPGraffitiArtist-0.2.5.zip** from the [latest release](https://github.com/maddavo/KSPGraffitiArtist/releases/latest). The source ZIPs are for development and do not contain the compiled plugin.
+3. Extract the ZIP and copy its `GameData/KSPGraffitiArtist` folder into your KSP installation's `GameData` folder. The plugin should be at `GameData/KSPGraffitiArtist/Plugins/KSPGraffitiArtist.dll`.
+4. Start KSP and find **GA-1 Graffiti Artist Spray Can** in Utility. In career mode it unlocks at **Engineering 101**, costs 25 funds and occupies 0.8 L in KIS inventory. Cans can stack in KIS inventories.
 
-World markings stay in the current save: KK paint belongs to an instance UUID; terrain paint uses body coordinates. See [world surfaces](docs/WORLD-SURFACES.md) for supported targets, limits and acceptance checks.
+Back up your save before installing or updating. When updating, preserve your custom `Images` files and replace the addon files with the new release. CKAN indexing has not yet been requested; use manual installation for this release.
 
-Reach is distance-only (3 m). Opaque glyph boxes are addressed by selecting a compiled transparent shader profile available in the installed game; see [transparent-glyph diagnosis](docs/TRANSPARENT-GLYPHS.md). Existing labels regenerate without a save edit.
+## Painting
 
-User-installed Windows TTF/OTF fonts are now read from their registrations as well as Unity's list, and opening the picker refreshes the catalogue. See [Countdown investigation](docs/USER-FONTS.md). maddavo confirmed the preceding 0.2.1 correction works; this does not validate native Countdown rendering.
+1. Carry a spray can in the Kerbal's KIS inventory and equip it in the right hand on EVA.
+2. Right-click a vessel part, KK instance or solid planetary surface within **3 m** to open the paint editor.
+3. Enter text and choose an installed font, style and colour, or select a PNG picture. Inspect the preview on the surface.
+4. Adjust placement with the controls below, then choose **Apply** or **Cancel**.
+5. Right-click an existing marking with the can equipped to edit or erase it.
 
-Vessel and KK painting are user-confirmed. Mun click rejection is addressed by resolving a terrain quad through its explicit planet owner and mesh links; see [Mun targeting](docs/MUN-TARGETING.md). Native terrain testing remains pending.
+| Control | Action |
+| --- | --- |
+| I / J / K / L | Move up / left / down / right along the placement surface |
+| Q / E | Rotate |
+| A / D | Decrease / increase width |
+| Alt + right-click | Open the normal part menu |
+| Escape | Cancel the current edit |
 
-Countdown discovery is working, but the native file-font load failed in 0.2.3. The new fallback renders the actual installed font through offscreen Windows GDI and feeds transparent glyph coverage to the existing paint renderer. See [Countdown loading](docs/COUNTDOWN-LOADING.md) for real Windows pixel evidence and remaining native checks.
+When the text box has focus, these keys type normally. Click another editor control to use the placement keys. Reach is distance-only; the Kerbal does not need a separate line-of-sight check. Mouse targeting still selects the first nearby physical surface under the pointer.
 
-## Documentation
+Font styles are Regular, Bold, Italic and Bold Italic. User-installed Windows TTF/OTF fonts are included in the picker; opening it refreshes the list. If Unity cannot load a registered font dynamically, the Windows fallback renders that font's coverage. Unsupported or unavailable fonts are reported in the editor.
 
-- [Interaction and requirements](docs/REQUIREMENTS.md): agreed behaviour, control rules, and scope.
-- [Technical design](docs/DESIGN.md): proposed components, persistence, research findings, and unresolved decisions.
-- [Development roadmap](docs/ROADMAP.md): staged implementation and evidence needed at each stage.
-- [Validation plan](docs/VALIDATION.md): offline checks and separate in-game acceptance scenarios.
+The can does not consume paint. Applied markings do not require the can to remain equipped.
 
-## Compatibility target
+## Custom images
 
-Initial target: **KSP 1.12.5 on Windows with Kerbal Inventory System (KIS)**. This is a target, not verified compatibility. The initial use case is an EVA engineer labelling existing vessels and modules.
+Copy pictures into `GameData/KSPGraffitiArtist/Images`, then click **Refresh pictures** in the editor. No restart is needed.
 
-The prototype uses its own surface-conforming meshes and part-module storage. It requires KIS (built against 1.29.8039.40483), KIS's bundled KSPDev utilities, and ModuleManager. Conformal Decals is not a dependency. Stock EVA inventory support is not implemented.
+- PNG format, up to **2048 pixels in either dimension** and **4 MiB per file**.
+- Transparency is supported; image colours and aspect ratio are retained.
+- Up to 64 filenames are listed; decoded images share a 64 MiB cache budget.
+- A transparent `direction-arrow.png` is included for testing. The logo shown in the screenshot is not bundled as a paint image.
 
-## Installation and development
+Resize oversized images before using them. Missing or invalid files produce an unavailable-image message; keep custom images at the same filenames so saved markings can find them.
 
-See [building and using the prototype](docs/PROTOTYPE.md) for build/package commands, controls, limits, and future installation instructions. No live game files or saves were changed while preparing the candidate.
+## Persistence and limitations
 
-The first in-game check must investigate a marking on an already-launched curved tank, including surface alignment and save/reload persistence. See the [roadmap](docs/ROADMAP.md).
+Vessel markings are stored on their painted parts. KK and terrain markings are stored in the current save: KK paint is tied to the instance UUID, and terrain paint uses body coordinates. Removing a KK instance does not reassign its markings to another object.
+
+Painting uses readable visible meshes. Animated, rescaled, deployable and variant-switched parts, terrain LOD transitions and unusual third-party geometry may need additional testing. Paint that extends beyond the selected surface may be clipped. See [world surfaces](docs/WORLD-SURFACES.md) and the [validation notes](docs/VALIDATION.md) for details.
+
+Keep save backups before removing the mod: saving without its modules can discard marking records. Custom PNGs and fonts are not embedded in saves. Player-supplied fonts are not redistributed with the mod.
+
+## Development and support
+
+Report problems through [GitHub Issues](https://github.com/maddavo/KSPGraffitiArtist/issues), including the mod version, KSP version and relevant `GraffitiArtist` lines from `KSP.log`. Remove private information before attaching logs or saves.
+
+- [Build and package instructions](docs/PROTOTYPE.md)
+- [Design](docs/DESIGN.md)
+- [Validation notes](docs/VALIDATION.md)
+- [Changelog](CHANGELOG.md)
+
+## Licence
+
+Project code, documentation and original spray-can assets are released under the [MIT licence](LICENSE), copyright 2026 maddavo. Third-party game artwork, logos and trademarks visible in example screenshots remain the property of their respective owners. Dependencies and player-supplied fonts and images retain their own licences.

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.5 - first public packaged release, 10 November 2026
+
+- Publish the current working 0.2.5 feature set with an MIT licence, included in the release archive.
+- Update installation, dependencies, controls, fonts, custom PNG limits and compatibility documentation. No plugin behaviour changes in this release preparation.
+
 ## 0.2.5 - local surface targeting, 8 November 2026
 
 - Exclude distant scaled-space planet colliders from the local paint ray. Actual rejected KK clicks logged Mun on layer 10 (Scaled Scenery); nearby local obstacles still own clicks and the 3 m EVA reach remains unchanged.
